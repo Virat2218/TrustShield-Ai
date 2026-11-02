@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustShield AI Guard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="shield-badge">🛡️</div>
+        <div>
+          <h1 class="logo-title">TrustShield <span class="cyan">AI</span></h1>
+          <p class="logo-subtitle">Real-Time Threat Scanner</p>
+        </div>
+      </div>
+      <a href="options.html" target="_blank" class="settings-btn" title="Settings">⚙️</a>
+    </header>
+
+    <!-- Target URL Box -->
+    <div class="url-card">
+      <div class="url-header">
+        <span class="pulse-dot"></span>
+        <span class="url-label">ACTIVE BROWSER TAB</span>
+      </div>
+      <div id="targetUrl" class="url-text" title="Active URL">Loading active tab...</div>
+    </div>
+
+    <!-- Scan Action -->
+    <button id="scanBtn" class="btn-scan">
+      <span class="btn-icon">⚡</span>
+      <span class="btn-text">Analyze Website Safety</span>
+    </button>
+
+    <!-- Loader -->
+    <div id="loadingBox" class="loading-box hidden">
+      <div class="spinner"></div>
+      <p class="loading-text">Deep scanning URL heuristics & scam databases...</p>
+    </div>
+
+    <!-- Error Box -->
+    <div id="errorBox" class="error-box hidden">
+      <div class="error-icon">⚠️</div>
+      <div id="errorMessage" class="error-text">Unable to connect to TrustShield backend.</div>
+    </div>
+
+    <!-- Results Box -->
+    <div id="resultBox" class="result-box hidden">
+      <div class="score-row">
+        <div class="score-circle" id="scoreCircle">
+          <span id="riskScore">0</span>
+          <span class="score-label">RISK</span>
+        </div>
+        <div class="level-info">
+          <span id="riskBadge" class="risk-badge">SAFE</span>
+          <h3 id="riskSummary" class="risk-summary">Website appears safe</h3>
+        </div>
+      </div>
+
+      <div class="result-details">
+        <div class="section-title">SECURITY INDICATORS</div>
+        <ul id="warningsList" class="warnings-list"></ul>
+      </div>
+
+      <div class="card-actions">
+        <button id="deepScanBtn" class="btn-secondary">
+          <span>🔍</span> Full Analysis in Web App
+        </button>
+        <button id="reportBtn" class="btn-danger">
+          <span>🚨</span> Report as Scam
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Protected by TrustShield AI Intelligence</span>
+      <span class="version-tag">v3.0</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

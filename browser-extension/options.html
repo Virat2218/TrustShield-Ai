@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustShield AI Extension Options</title>
+  <style>
+    body {
+      background-color: #0a0e1a;
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      background-color: #0f172a;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    h2 {
+      margin-top: 0;
+      color: #06b6d4;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .field {
+      margin-top: 16px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      background: #030712;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #06b6d4;
+    }
+    .hint {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background: linear-gradient(135deg, #06b6d4, #2563eb);
+      color: #040814;
+      font-weight: 700;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .saved-msg {
+      margin-top: 10px;
+      color: #10b981;
+      font-size: 12px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🛡️ TrustShield AI Settings</h2>
+
+    <div class="field">
+      <label for="backendUrl">Backend API Server Endpoint</label>
+      <input type="text" id="backendUrl" placeholder="http://localhost:8000">
+      <div class="hint">The running FastAPI endpoint for scam & URL intelligence.</div>
+    </div>
+
+    <div class="field">
+      <label for="webAppUrl">Web Application URL</label>
+      <input type="text" id="webAppUrl" placeholder="http://localhost:5173">
+      <div class="hint">The TrustShield AI Frontend URL for deep reports and community reporting.</div>
+    </div>
+
+    <button id="saveBtn">Save Preferences</button>
+    <div id="savedMsg" class="saved-msg">✓ Preferences saved successfully!</div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
+
