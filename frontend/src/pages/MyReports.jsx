@@ -15,13 +15,15 @@ import {
   Phone,
   Globe,
   ExternalLink,
+  Paperclip,
 } from 'lucide-react';
-import { getUserReports, deleteUserReport } from '../services/api';
+import { getUserReports, deleteUserReport, getReportAttachmentBlobUrl } from '../services/api';
 
 export default function MyReports() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
+  const [attachmentLoading, setAttachmentLoading] = useState(null);
 
   useEffect(() => {
     async function loadReports() {
@@ -52,6 +54,18 @@ export default function MyReports() {
       setCopiedId(refId);
       setTimeout(() => setCopiedId(null), 2500);
     });
+  };
+
+  const handleViewAttachment = async (reportId) => {
+    setAttachmentLoading(reportId);
+    try {
+      const blobUrl = await getReportAttachmentBlobUrl(reportId);
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error('Failed to load attachment:', err);
+    } finally {
+      setAttachmentLoading(null);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -174,6 +188,17 @@ export default function MyReports() {
                     <Phone className="w-3 h-3" />
                     {rep.phone_number}
                   </span>
+                )}
+                {rep.has_attachment && (
+                  <button
+                    onClick={() => handleViewAttachment(rep.id)}
+                    disabled={attachmentLoading === rep.id}
+                    className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition disabled:opacity-50 cursor-pointer"
+                    title="View screenshot attachment"
+                  >
+                    <Paperclip className="w-3 h-3" />
+                    {attachmentLoading === rep.id ? 'Loading…' : 'Screenshot'}
+                  </button>
                 )}
                 <span className="flex items-center gap-1 text-slate-500 ml-auto">
                   <Calendar className="w-3 h-3" />

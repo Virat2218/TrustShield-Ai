@@ -20,11 +20,13 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
     is_admin = Column(Boolean, default=False, nullable=False)
+    token_version = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     scans = relationship("ScanRecord", back_populates="owner", cascade="all, delete-orphan")
     reports = relationship("CommunityReport", back_populates="reporter", cascade="all, delete-orphan")
     quiz_attempts = relationship("QuizAttempt", back_populates="user", cascade="all, delete-orphan")
+    reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
 
 class ScanRecord(Base):
     __tablename__ = "scan_records"
@@ -112,12 +114,32 @@ class AdminAuditLog(Base):
     details = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    token_hash = Column(String(64), unique=True, index=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False, index=True)
+    used = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="reset_tokens")
+
 def init_db():
     Base.metadata.create_all(bind=engine)
     # Safe migration: ensure is_admin exists on users if sqlite table was created in Phase 2
     try:
         with engine.connect() as conn:
             conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0"))
+            conn.commit()
+    except Exception:
+        pass  # Column already exists
+
+    # Safe migration: ensure token_version exists on users for session invalidation
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 1"))
             conn.commit()
     except Exception:
         pass  # Column already exists

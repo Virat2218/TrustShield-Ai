@@ -48,6 +48,11 @@ class MessageAnalysisResponse(BaseModel):
     analysis_mode: str  # 'ai' or 'rule-based'
     scan_id: Optional[int] = None
 
+class SafeBrowsingCheckResponse(BaseModel):
+    status: str  # 'threat_found' | 'no_matches' | 'not_configured' | 'api_error'
+    threats: list[str] = []
+    details: str
+
 class URLAnalysisResponse(BaseModel):
     risk_score: int
     risk_level: str
@@ -57,6 +62,7 @@ class URLAnalysisResponse(BaseModel):
     summary: str
     recommendations: list[str]
     analysis_mode: str
+    safe_browsing: Optional[SafeBrowsingCheckResponse] = None
     scan_id: Optional[int] = None
 
 class HealthResponse(BaseModel):
@@ -139,14 +145,29 @@ class UserLoginRequest(BaseModel):
     def email_cleanup(cls, v):
         return v.strip().lower()
 
-class PasswordResetRequest(BaseModel):
+class ForgotPasswordRequest(BaseModel):
     email: str
-    new_password: str = Field(..., min_length=6, max_length=128)
 
     @field_validator('email')
     @classmethod
     def email_cleanup(cls, v):
-        return v.strip().lower()
+        v = v.strip().lower()
+        if not v or "@" not in v:
+            raise ValueError("Invalid email format")
+        return v
+
+class ResetPasswordConfirmRequest(BaseModel):
+    token: str = Field(..., min_length=10, max_length=256)
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+    @field_validator('token')
+    @classmethod
+    def token_cleanup(cls, v):
+        return v.strip()
+
+class GenericMessageResponse(BaseModel):
+    status: str = "ok"
+    message: str
 
 class UserProfileResponse(BaseModel):
     id: int

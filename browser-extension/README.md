@@ -25,10 +25,7 @@ Real-time browser security extension that integrates directly with TrustShield A
    - **Microsoft Edge:** `edge://extensions`
 2. In the top-right corner, enable **"Developer mode"**.
 3. Click the **"Load unpacked"** button.
-4. Select the `browser-extension` folder located inside the `TrustShield Ai` project:
-   ```bash
-   /Users/kushalpandya/TrustShield Ai/browser-extension
-   ```
+4. Select the `browser-extension` folder located inside your local `TrustShield-Ai` project directory (e.g., `<path-to-TrustShield-Ai>/browser-extension`).
 5. The extension **"TrustShield AI – Real-Time URL Scam Guard"** will appear in your extensions list.
 6. Click the Extensions puzzle piece icon on your browser toolbar and pin **TrustShield AI**.
 

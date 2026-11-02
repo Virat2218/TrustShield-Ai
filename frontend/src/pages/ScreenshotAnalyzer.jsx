@@ -149,6 +149,10 @@ export default function ScreenshotAnalyzer() {
               <p className="text-xs text-slate-400 mt-1">
                 {t.screenshotAnalyzer.formats}
               </p>
+              <div className="mt-2 inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-mono">
+                <Info className="w-3 h-3 text-cyan-400" />
+                <span>PNG, JPEG, WEBP • Max 5 MB</span>
+              </div>
             </div>
             <button
               type="button"

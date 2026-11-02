@@ -33,7 +33,12 @@ else
 fi
 
 if [ ! -f ".env" ]; then
+    echo "Creating backend .env with cryptographically random JWT_SECRET_KEY..."
     cp .env.example .env
+    RANDOM_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || openssl rand -base64 32 2>/dev/null || echo "")
+    if [ -n "$RANDOM_KEY" ]; then
+        sed -i '' "s|^JWT_SECRET_KEY=.*$|JWT_SECRET_KEY=${RANDOM_KEY}|" .env 2>/dev/null || sed -i "s|^JWT_SECRET_KEY=.*$|JWT_SECRET_KEY=${RANDOM_KEY}|" .env 2>/dev/null || true
+    fi
 fi
 
 uvicorn main:app --reload --port 8000 &
@@ -60,6 +65,7 @@ echo "✅ TrustShield AI is running!"
 echo "   🌐 Frontend: http://localhost:5173"
 echo "   📡 Backend:  http://localhost:8000"
 echo "   📚 API Docs: http://localhost:8000/docs"
+echo "   🛡️  First Admin Setup: cd backend && source venv/bin/activate && python bootstrap_admin.py --email <your-registered-email>"
 echo ""
 echo "Press Ctrl+C to stop both servers."
 

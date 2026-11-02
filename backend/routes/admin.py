@@ -159,6 +159,13 @@ def update_user_status(
         raise HTTPException(status_code=404, detail="User not found.")
 
     if request.is_admin is not None:
+        if target_user.is_admin and request.is_admin is False:
+            admin_count = db.query(User).filter(User.is_admin == True).count()
+            if admin_count <= 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot revoke administrator privileges from the last active administrator.",
+                )
         target_user.is_admin = request.is_admin
 
     if request.full_name is not None:
@@ -202,6 +209,8 @@ def get_all_reports(
             "status": r.status,
             "moderation_notes": r.moderation_notes,
             "created_at": r.created_at.isoformat(),
+            "has_attachment": bool(r.screenshot_filename),
+            "attachment_url": f"/api/community/reports/{r.id}/attachment" if r.screenshot_filename else None,
         })
     return output
 

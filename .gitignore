@@ -32,6 +32,10 @@ yarn-error.log*
 *.sqlite3
 trustshield.db
 backend/trustshield.db
+.dev_mailbox.json
+backend/.dev_mailbox.json
+uploads/
+backend/uploads/
 
 # Environment variables & secrets
 .env

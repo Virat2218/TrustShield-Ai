@@ -60,10 +60,17 @@ export const loginUser = async (data) => {
   return response.data;
 };
 
+export const requestPasswordReset = async (data) => {
+  const response = await api.post('/auth/forgot-password', data);
+  return response.data;
+};
+
 export const resetPassword = async (data) => {
   const response = await api.post('/auth/reset-password', data);
   return response.data;
 };
+
+export const confirmPasswordReset = resetPassword;
 
 export const getProfile = async () => {
   const response = await api.get('/auth/me');
@@ -177,6 +184,13 @@ export const getUserReportDetail = async (reportId) => {
 export const deleteUserReport = async (reportId) => {
   const response = await api.delete(`/community/reports/${reportId}`);
   return response.data;
+};
+
+export const getReportAttachmentBlobUrl = async (reportId) => {
+  const response = await api.get(`/community/reports/${reportId}/attachment`, {
+    responseType: 'blob',
+  });
+  return URL.createObjectURL(response.data);
 };
 
 // Phase 3: Feature 3 - Admin Dashboard

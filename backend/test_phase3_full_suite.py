@@ -180,6 +180,36 @@ def run_comprehensive_suite():
             assert len(detail["prevention_tips"]) > 0
             print(f"    ✅ Alert detail verified with {len(detail['warning_signs'])} warning signs")
 
+            # 10. Security Audit: Secure Password Reset Flow
+            print("\n[10] Security Audit: Two-Step Password Reset & Session Invalidation")
+            from test_password_reset import run_password_reset_security_tests
+            run_password_reset_security_tests()
+
+            # 11. Security Audit: JWT Signing Key Validation & Cryptographic Integrity
+            print("\n[11] Security Audit: JWT Signing Key Validation & Cryptographic Integrity")
+            from test_jwt_security import run_jwt_security_tests
+            run_jwt_security_tests()
+
+            # 12. Security Audit: Screenshot Upload Hardening & OCR Sanitization
+            print("\n[12] Security Audit: Screenshot Upload Hardening & OCR Sanitization")
+            from test_screenshot_upload_security import run_screenshot_upload_security_tests
+            run_screenshot_upload_security_tests()
+
+            # 13. Security Audit: Community Report Screenshot Attachment Storage
+            print("\n[13] Security Audit: Community Report Attachment Storage & Access Control")
+            from test_community_attachments import run_all as run_community_tests
+            assert run_community_tests() is True
+
+            # 14. Security Audit: First-Admin Bootstrap & Authorization Flow
+            print("\n[14] Security Audit: First-Admin Bootstrap & Authorization Flow")
+            from test_admin_bootstrap import run_admin_bootstrap_tests
+            assert run_admin_bootstrap_tests() is True
+
+            # 15. Security Audit: Google Safe Browsing Resilience & Explicit Outcomes
+            print("\n[15] Security Audit: Safe Browsing Outcome Differentiation & Resilience")
+            from test_safe_browsing_security import run_safe_browsing_security_tests
+            assert run_safe_browsing_security_tests() is True
+
             print("\n" + "=" * 60)
             print("ALL PHASE 1, PHASE 2, AND PHASE 3 TESTS COMPLETED SUCCESSFULLY!")
             print("=" * 60)

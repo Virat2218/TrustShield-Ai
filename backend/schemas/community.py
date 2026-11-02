@@ -21,18 +21,28 @@ class CommunityReportItem(BaseModel):
     id: int
     reference_id: str
     category: str
-    suspicious_url: Optional[str]
-    phone_number: Optional[str]
-    message: Optional[str]
+    suspicious_url: Optional[str] = None
+    phone_number: Optional[str] = None
+    message: Optional[str] = None
     description: str
-    screenshot_filename: Optional[str]
-    incident_date: Optional[str]
+    screenshot_filename: Optional[str] = None
+    has_attachment: bool = False
+    attachment_url: Optional[str] = None
+    incident_date: Optional[str] = None
     status: str
-    moderation_notes: Optional[str]
+    moderation_notes: Optional[str] = None
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def from_report(cls, report):
+        item = cls.model_validate(report)
+        if report.screenshot_filename:
+            item.has_attachment = True
+            item.attachment_url = f"/api/community/reports/{report.id}/attachment"
+        return item
 
 class CommunityReportDetail(CommunityReportItem):
     pass

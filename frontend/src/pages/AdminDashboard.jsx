@@ -20,6 +20,7 @@ import {
   HelpCircle,
   TrendingUp,
   Award,
+  Paperclip,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -46,6 +47,7 @@ import {
   deleteAdminAlert,
   createAdminQuizQuestion,
   deleteAdminQuizQuestion,
+  getReportAttachmentBlobUrl,
 } from '../services/api';
 
 const COLORS = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
@@ -76,6 +78,19 @@ export default function AdminDashboard() {
   const [modStatus, setModStatus] = useState('Verified');
   const [modNotes, setModNotes] = useState('');
   const [modSubmitting, setModSubmitting] = useState(false);
+  const [attachmentLoading, setAttachmentLoading] = useState(false);
+
+  const handleViewReportAttachment = async (reportId) => {
+    setAttachmentLoading(true);
+    try {
+      const blobUrl = await getReportAttachmentBlobUrl(reportId);
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error('Failed to load attachment:', err);
+    } finally {
+      setAttachmentLoading(false);
+    }
+  };
 
   // Alerts tab state
   const [showAlertModal, setShowAlertModal] = useState(false);
@@ -695,6 +710,23 @@ export default function AdminDashboard() {
                         {selectedReport.description}
                       </p>
                     </div>
+
+                    {selectedReport.has_attachment && (
+                      <div>
+                        <span className="text-xs text-gray-400">Evidence Screenshot:</span>
+                        <div className="mt-1">
+                          <button
+                            type="button"
+                            onClick={() => handleViewReportAttachment(selectedReport.id)}
+                            disabled={attachmentLoading}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-medium transition cursor-pointer disabled:opacity-50"
+                          >
+                            <Paperclip className="w-3.5 h-3.5" />
+                            {attachmentLoading ? 'Loading…' : 'View Screenshot'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     <form onSubmit={handleModerateSubmit} className="space-y-4 pt-2">
                       <div>

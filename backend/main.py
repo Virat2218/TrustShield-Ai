@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from database import init_db
+from services.auth_service import validate_jwt_secret
 from routes.message_analysis import router as message_router
 from routes.url_analysis import router as url_router
 from routes.screenshot_analysis import router as screenshot_router
@@ -24,6 +25,8 @@ load_dotenv()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("✅ TrustShield AI Backend starting...")
+    validate_jwt_secret()
+    print("   Security: JWT_SECRET_KEY validated (HS256, >= 32 chars)")
     init_db()
     print("   Database: Initialized")
     print(f"   AI Mode: {'Enabled' if os.getenv('GEMINI_API_KEY') or os.getenv('OPENAI_API_KEY') else 'Demo (rule-based)'}")

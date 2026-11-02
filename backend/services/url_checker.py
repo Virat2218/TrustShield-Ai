@@ -3,8 +3,32 @@ import os
 import hashlib
 import base64
 import httpx
+from enum import Enum
+from dataclasses import dataclass
 from urllib.parse import urlparse
-from typing import Optional
+from typing import Optional, List, Dict, Any
+
+SAFE_BROWSING_TIMEOUT_SECONDS = float(os.getenv("SAFE_BROWSING_TIMEOUT_SECONDS", "5.0"))
+
+class SafeBrowsingStatus(str, Enum):
+    THREAT_FOUND = "threat_found"
+    NO_MATCHES = "no_matches"
+    NOT_CONFIGURED = "not_configured"
+    API_ERROR = "api_error"
+
+@dataclass
+class SafeBrowsingResult:
+    status: SafeBrowsingStatus
+    threats: List[str]
+    details: str
+    raw_matches: Optional[List[Dict[str, Any]]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "status": self.status.value if isinstance(self.status, SafeBrowsingStatus) else str(self.status),
+            "threats": self.threats or [],
+            "details": self.details or "",
+        }
 
 SUSPICIOUS_TLDS = {'.xyz', '.top', '.tk', '.ml', '.ga', '.cf', '.gq', '.pw', '.cc', '.su', '.icu', '.click', '.link', '.vip', '.cyou'}
 URL_SHORTENERS = {'bit.ly', 'tinyurl.com', 'goo.gl', 't.co', 'ow.ly', 'short.io', 'cutt.ly', 'rb.gy', 'is.gd', 'buff.ly'}
@@ -154,33 +178,104 @@ def _get_url_recommendations(risk_level: str, warnings: list[str]) -> list[str]:
     recs.append("When in doubt, contact the organization directly through official channels.")
     return list(dict.fromkeys(recs))  # deduplicate
 
-async def check_google_safe_browsing(url: str, api_key: str) -> Optional[dict]:
+async def check_google_safe_browsing(
+    url: str,
+    api_key: Optional[str] = None,
+    timeout_seconds: Optional[float] = None,
+) -> SafeBrowsingResult:
     """
-    Check URL against Google Safe Browsing API.
-    Returns threat info dict if threat found, None if safe or API unavailable.
+    Check URL against Google Safe Browsing API v4.
+    Returns SafeBrowsingResult with explicit status:
+      - THREAT_FOUND: threat matches detected in database
+      - NO_MATCHES: API completed successfully, zero matches found
+      - NOT_CONFIGURED: API key missing or empty
+      - API_ERROR: HTTP error, timeout, network error, or malformed response
     """
-    if not api_key:
-        return None
-    
+    key = (api_key if api_key is not None else os.getenv("GOOGLE_SAFE_BROWSING_API_KEY", "")).strip()
+    if not key:
+        return SafeBrowsingResult(
+            status=SafeBrowsingStatus.NOT_CONFIGURED,
+            threats=[],
+            details="Google Safe Browsing API key is not configured. External threat database check was not performed.",
+        )
+
+    t_sec = timeout_seconds if timeout_seconds is not None else SAFE_BROWSING_TIMEOUT_SECONDS
+    timeout = httpx.Timeout(t_sec, connect=min(3.0, t_sec))
+
+    payload = {
+        "client": {"clientId": "trustshield-ai", "clientVersion": "1.0.0"},
+        "threatInfo": {
+            "threatTypes": [
+                "MALWARE",
+                "SOCIAL_ENGINEERING",
+                "UNWANTED_SOFTWARE",
+                "POTENTIALLY_HARMFUL_APPLICATION",
+            ],
+            "platformTypes": ["ANY_PLATFORM"],
+            "threatEntryTypes": ["URL"],
+            "threatEntries": [{"url": url}],
+        },
+    }
+
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            payload = {
-                "client": {"clientId": "trustshield-ai", "clientVersion": "1.0.0"},
-                "threatInfo": {
-                    "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
-                    "platformTypes": ["ANY_PLATFORM"],
-                    "threatEntryTypes": ["URL"],
-                    "threatEntries": [{"url": url}],
-                }
-            }
+        async with httpx.AsyncClient(timeout=timeout) as client:
             resp = await client.post(
-                f"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={api_key}",
-                json=payload
+                "https://safebrowsing.googleapis.com/v4/threatMatches:find",
+                params={"key": key},
+                json=payload,
             )
-            resp.raise_for_status()
+
+        if resp.status_code != 200:
+            return SafeBrowsingResult(
+                status=SafeBrowsingStatus.API_ERROR,
+                threats=[],
+                details=f"Google Safe Browsing API returned HTTP {resp.status_code}. External check did not complete.",
+            )
+
+        try:
             data = resp.json()
-            if data.get("matches"):
-                return data["matches"]
-    except Exception:
-        pass
-    return None
+        except Exception:
+            return SafeBrowsingResult(
+                status=SafeBrowsingStatus.API_ERROR,
+                threats=[],
+                details="Google Safe Browsing API returned an invalid non-JSON response. External check did not complete.",
+            )
+
+        matches = data.get("matches", []) if isinstance(data, dict) else []
+        if matches:
+            threat_types = [
+                m.get("threatType", "UNKNOWN_THREAT")
+                for m in matches
+                if isinstance(m, dict)
+            ]
+            return SafeBrowsingResult(
+                status=SafeBrowsingStatus.THREAT_FOUND,
+                threats=threat_types,
+                details=f"Confirmed threat match in Google Safe Browsing: {', '.join(threat_types)}",
+                raw_matches=matches,
+            )
+        else:
+            return SafeBrowsingResult(
+                status=SafeBrowsingStatus.NO_MATCHES,
+                threats=[],
+                details="Google Safe Browsing check completed: no active threat matches found.",
+            )
+
+    except httpx.TimeoutException:
+        return SafeBrowsingResult(
+            status=SafeBrowsingStatus.API_ERROR,
+            threats=[],
+            details="Google Safe Browsing request timed out. External threat database check did not complete.",
+        )
+    except httpx.RequestError as exc:
+        return SafeBrowsingResult(
+            status=SafeBrowsingStatus.API_ERROR,
+            threats=[],
+            details=f"Google Safe Browsing connection failure ({type(exc).__name__}). External threat database check did not complete.",
+        )
+    except Exception as exc:
+        return SafeBrowsingResult(
+            status=SafeBrowsingStatus.API_ERROR,
+            threats=[],
+            details=f"Google Safe Browsing check failed unexpectedly ({type(exc).__name__}). External threat database check did not complete.",
+        )

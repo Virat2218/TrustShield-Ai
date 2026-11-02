@@ -1,12 +1,15 @@
 import json
+import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from schemas.analysis import ScreenshotAnalysisResponse
-from services.ocr_service import extract_text_from_image
+from services import ocr_service
 from services.ai_detection import analyze_message_ai, analyze_message_rules
 from services.auth_service import get_current_user_optional
 from database import get_db, ScanRecord, User
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,15 +20,26 @@ async def analyze_screenshot(
     db: Session = Depends(get_db),
 ):
     """
-    Accepts an uploaded screenshot image, performs OCR text extraction,
+    Accepts an uploaded screenshot image, validates upload size in bounded streaming chunks,
+    verifies image integrity and raster format using Pillow, performs OCR text extraction,
     and runs scam detection analysis on the extracted message.
     """
     try:
-        image_bytes = await file.read()
-        if not image_bytes:
-            raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+        # 1. Stream upload in bounded chunks and enforce maximum size
+        image_bytes = await ocr_service.stream_and_validate_upload(file)
 
-        extracted_text = extract_text_from_image(image_bytes)
+        # 2. Validate raster format and image integrity using Pillow byte signature checks
+        ocr_service.validate_raster_image(image_bytes)
+
+        # 3. Extract text safely via OCR
+        try:
+            extracted_text = ocr_service.extract_text_from_image(image_bytes)
+        except ocr_service.OCRError as oe:
+            logger.warning(f"OCR service unavailable: {str(oe)}")
+            raise HTTPException(
+                status_code=503,
+                detail="OCR text extraction service is currently unavailable. Please try again later.",
+            )
 
         if not extracted_text or len(extracted_text.strip()) < 3:
             raise HTTPException(
@@ -33,7 +47,7 @@ async def analyze_screenshot(
                 detail="No legible text could be extracted from this image. Please upload a clearer screenshot containing text.",
             )
 
-        # Analyze extracted text using existing AI/rule engine
+        # 4. Analyze extracted text using existing AI/rule engine
         result = await analyze_message_ai(extracted_text)
         if result is None:
             result = analyze_message_rules(extracted_text)
@@ -49,27 +63,31 @@ async def analyze_screenshot(
             "analysis_mode": result.get("analysis_mode", "ocr+rule-based"),
         }
 
-        # Save to scan history if user is authenticated
+        # 5. Save to scan history if user is authenticated
         if current_user:
-            scan = ScanRecord(
-                user_id=current_user.id,
-                scan_type="screenshot",
-                submitted_content=extracted_text[:500],
-                risk_score=result["risk_score"],
-                risk_level=result["risk_level"],
-                analysis_result=json.dumps(response_data),
-            )
-            db.add(scan)
-            db.commit()
-            db.refresh(scan)
-            response_data["scan_id"] = scan.id
+            try:
+                scan = ScanRecord(
+                    user_id=current_user.id,
+                    scan_type="screenshot",
+                    submitted_content=extracted_text[:500],
+                    risk_score=result["risk_score"],
+                    risk_level=result["risk_level"],
+                    analysis_result=json.dumps(response_data),
+                )
+                db.add(scan)
+                db.commit()
+                db.refresh(scan)
+                response_data["scan_id"] = scan.id
+            except Exception as dbe:
+                logger.error(f"Failed to record scan in database: {type(dbe).__name__}")
 
         return ScreenshotAnalysisResponse(**response_data)
 
-    except ValueError as ve:
-        raise HTTPException(status_code=422, detail=str(ve))
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Screenshot analysis failed: {str(e)}")
-
+        logger.error(f"Unexpected error during screenshot analysis: {type(e).__name__}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Screenshot analysis failed due to an internal processing error.",
+        )
