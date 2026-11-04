@@ -247,7 +247,7 @@ def main():
         print("=" * 65)
         print("Next steps:")
         print("1. Log in at http://localhost:5173/login with this account.")
-        print("2. Navigate to the Admin Dashboard at http://localhost:5173/admin.")
+        print("2. Navigate to the Admin Dashboard at http://localhost:5173/admin/dashboard (or /admin).")
         print("3. Manage threat alerts, moderate scam reports, and invite other team members.")
         print("=" * 65)
         sys.exit(0)

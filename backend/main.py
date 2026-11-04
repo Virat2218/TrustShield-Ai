@@ -1,8 +1,17 @@
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables before importing application modules
+env_path = Path(__file__).resolve().parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
 from database import init_db
 from services.auth_service import validate_jwt_secret
@@ -19,8 +28,6 @@ from routes.community import router as community_router
 from routes.admin import router as admin_router
 from routes.alerts import router as alerts_router
 from schemas.analysis import HealthResponse
-
-load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,13 +49,25 @@ app = FastAPI(
 )
 
 # CORS configuration
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
-allowed_origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip()]
+raw_allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
+allowed_origins = [o.strip() for o in raw_allowed_origins.split(",") if o.strip()]
+
+frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
+if frontend_url and frontend_url not in allowed_origins:
+    allowed_origins.append(frontend_url)
+
+# Per W3C CORS specification: allow_credentials cannot be True if allow_origins contains wildcard "*"
+if not allowed_origins or "*" in allowed_origins:
+    cors_allow_origins = ["*"]
+    cors_allow_credentials = False
+else:
+    cors_allow_origins = allowed_origins
+    cors_allow_credentials = True
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins if allowed_origins else ["*"],
-    allow_credentials=True,
+    allow_origins=cors_allow_origins,
+    allow_credentials=cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -85,3 +104,9 @@ async def health_check():
         ocr_available=ocr_ok,
         version="2.0.0",
     )
+
+if __name__ == "__main__":
+    import uvicorn
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("main:app", host=host, port=port, reload=False)

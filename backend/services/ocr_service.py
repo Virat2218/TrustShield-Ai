@@ -1,16 +1,45 @@
 import os
 import io
 import logging
+from pathlib import Path
 from typing import Optional
 from PIL import Image
 import pytesseract
 from fastapi import UploadFile, HTTPException
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
+
+def get_max_screenshot_mb() -> int:
+    return int(os.getenv("MAX_SCREENSHOT_SIZE_MB", "5"))
+
+def get_max_upload_size_bytes() -> int:
+    return get_max_screenshot_mb() * 1024 * 1024
+
+def configure_tesseract():
+    candidate_paths = [
+        os.getenv("TESSERACT_CMD", "").strip(),
+        "/opt/homebrew/bin/tesseract",
+        "/usr/local/bin/tesseract",
+        "/usr/bin/tesseract",
+    ]
+    for p in candidate_paths:
+        if p and os.path.isfile(p) and os.access(p, os.X_OK):
+            pytesseract.pytesseract.tesseract_cmd = p
+            return p
+    return "tesseract"
+
+configure_tesseract()
+
 # Configurable maximum upload size (default 5 MB)
-MAX_SCREENSHOT_SIZE_MB = int(os.getenv("MAX_SCREENSHOT_SIZE_MB", "5"))
-MAX_UPLOAD_SIZE_BYTES = MAX_SCREENSHOT_SIZE_MB * 1024 * 1024
+MAX_SCREENSHOT_SIZE_MB = get_max_screenshot_mb()
+MAX_UPLOAD_SIZE_BYTES = get_max_upload_size_bytes()
 STREAM_CHUNK_SIZE = 64 * 1024  # 64 KB read buffer
 
 # Explicit allowlist of supported raster formats (Pillow format identifiers)
@@ -90,6 +119,7 @@ def extract_text_from_image(image_bytes: bytes) -> str:
     Raises OCRError with a sanitized user-facing message on failure without leaking
     internal stack traces or system command output.
     """
+    configure_tesseract()
     try:
         with Image.open(io.BytesIO(image_bytes)) as img:
             # Normalize color mode for OCR (handles RGBA, P, CMYK, etc.)

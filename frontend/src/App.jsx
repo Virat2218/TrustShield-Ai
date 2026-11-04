@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { LanguageProvider } from './hooks/useLanguage';
 import { AuthProvider, ProtectedRoute, AdminRoute } from './hooks/useAuth';
@@ -97,6 +97,10 @@ export default function App() {
                 />
                 <Route path="/alerts" element={<ScamAlerts />} />
                 <Route path="/alerts/:id" element={<AlertDetail />} />
+
+                {/* Aliases & Backward Compatibility */}
+                <Route path="/register" element={<Navigate to="/signup" replace />} />
+                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
                 {/* Fallback */}
                 <Route path="*" element={<Home />} />

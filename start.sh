@@ -21,7 +21,9 @@ cleanup() {
 trap cleanup SIGINT SIGTERM EXIT
 
 # 1. Start Backend
-echo "🚀 [1/2] Starting FastAPI Backend on http://localhost:8000..."
+BACKEND_HOST=${HOST:-127.0.0.1}
+BACKEND_PORT=${PORT:-8000}
+echo "🚀 [1/2] Starting FastAPI Backend on http://${BACKEND_HOST}:${BACKEND_PORT}..."
 cd backend
 if [ ! -d "venv" ]; then
     echo "Setting up Python virtual environment..."
@@ -41,7 +43,7 @@ if [ ! -f ".env" ]; then
     fi
 fi
 
-uvicorn main:app --reload --port 8000 &
+uvicorn main:app --reload --host "$BACKEND_HOST" --port "$BACKEND_PORT" &
 BACKEND_PID=$!
 cd ..
 
@@ -63,8 +65,8 @@ cd ..
 echo ""
 echo "✅ TrustShield AI is running!"
 echo "   🌐 Frontend: http://localhost:5173"
-echo "   📡 Backend:  http://localhost:8000"
-echo "   📚 API Docs: http://localhost:8000/docs"
+echo "   📡 Backend:  http://${BACKEND_HOST}:${BACKEND_PORT}"
+echo "   📚 API Docs: http://${BACKEND_HOST}:${BACKEND_PORT}/docs"
 echo "   🛡️  First Admin Setup: cd backend && source venv/bin/activate && python bootstrap_admin.py --email <your-registered-email>"
 echo ""
 echo "Press Ctrl+C to stop both servers."

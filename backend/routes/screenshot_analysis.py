@@ -1,6 +1,7 @@
 import json
 import logging
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from typing import Optional
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from schemas.analysis import ScreenshotAnalysisResponse
@@ -16,13 +17,14 @@ router = APIRouter()
 @router.post("/analyze-screenshot", response_model=ScreenshotAnalysisResponse)
 async def analyze_screenshot(
     file: UploadFile = File(...),
+    manual_text: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user_optional),
     db: Session = Depends(get_db),
 ):
     """
     Accepts an uploaded screenshot image, validates upload size in bounded streaming chunks,
-    verifies image integrity and raster format using Pillow, performs OCR text extraction,
-    and runs scam detection analysis on the extracted message.
+    verifies image integrity and raster format using Pillow, performs OCR text extraction
+    (or uses user-supplied manual text override), and runs scam detection analysis on the message.
     """
     try:
         # 1. Stream upload in bounded chunks and enforce maximum size
@@ -31,20 +33,22 @@ async def analyze_screenshot(
         # 2. Validate raster format and image integrity using Pillow byte signature checks
         ocr_service.validate_raster_image(image_bytes)
 
-        # 3. Extract text safely via OCR
-        try:
-            extracted_text = ocr_service.extract_text_from_image(image_bytes)
-        except ocr_service.OCRError as oe:
-            logger.warning(f"OCR service unavailable: {str(oe)}")
-            raise HTTPException(
-                status_code=503,
-                detail="OCR text extraction service is currently unavailable. Please try again later.",
-            )
+        # 3. Extract text safely via OCR or manual override
+        extracted_text = (manual_text or "").strip()
+        if not extracted_text:
+            try:
+                extracted_text = ocr_service.extract_text_from_image(image_bytes)
+            except ocr_service.OCRError as oe:
+                logger.warning(f"OCR service unavailable: {str(oe)}")
+                raise HTTPException(
+                    status_code=503,
+                    detail="OCR text extraction service is currently unavailable. Please enter the message text manually below.",
+                )
 
         if not extracted_text or len(extracted_text.strip()) < 3:
             raise HTTPException(
                 status_code=422,
-                detail="No legible text could be extracted from this image. Please upload a clearer screenshot containing text.",
+                detail="No legible text could be extracted from this image. Please upload a clearer screenshot or enter the message text manually.",
             )
 
         # 4. Analyze extracted text using existing AI/rule engine

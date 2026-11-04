@@ -1,7 +1,19 @@
 import axios from 'axios';
 
+// Support both same-origin reverse-proxy (/api) and external backend deployment (VITE_API_URL)
+const resolveBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl || envUrl.trim() === '' || envUrl.trim() === '/api') {
+    return '/api';
+  }
+  const clean = envUrl.trim().replace(/\/+$/, '');
+  return clean.endsWith('/api') ? clean : `${clean}/api`;
+};
+
+export const API_BASE_URL = resolveBaseUrl();
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   timeout: 35000,
   headers: {
     'Content-Type': 'application/json',
@@ -34,9 +46,12 @@ export const checkHealth = async () => {
 };
 
 // Phase 2: Feature 1 - Screenshot Analyzer
-export const analyzeScreenshot = async (file) => {
+export const analyzeScreenshot = async (file, manualText = '') => {
   const formData = new FormData();
   formData.append('file', file);
+  if (manualText && manualText.trim()) {
+    formData.append('manual_text', manualText.trim());
+  }
   const response = await api.post('/analyze-screenshot', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

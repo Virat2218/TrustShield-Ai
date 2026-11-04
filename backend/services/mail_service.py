@@ -1,18 +1,38 @@
 import os
 import json
 import smtplib
+from pathlib import Path
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
+from dotenv import load_dotenv
 
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
+
+def get_mail_config() -> Dict[str, Any]:
+    return {
+        "smtp_host": os.getenv("SMTP_HOST", "").strip(),
+        "smtp_port": int(os.getenv("SMTP_PORT", "587")),
+        "smtp_user": os.getenv("SMTP_USER", "").strip(),
+        "smtp_password": os.getenv("SMTP_PASSWORD", "").strip(),
+        "smtp_from_email": os.getenv("SMTP_FROM_EMAIL", os.getenv("SMTP_FROM", "noreply@trustshield.ai")).strip(),
+        "smtp_tls": os.getenv("SMTP_TLS", "true").lower() in ("true", "1", "yes"),
+        "frontend_url": os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/"),
+        "environment": os.getenv("ENVIRONMENT", "development").lower(),
+    }
+
+# Backward compatibility module attributes
 SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "").strip()
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
 SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", os.getenv("SMTP_FROM", "noreply@trustshield.ai")).strip()
 SMTP_TLS = os.getenv("SMTP_TLS", "true").lower() in ("true", "1", "yes")
-
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
 
@@ -33,7 +53,8 @@ def send_password_reset_email(to_email: str, raw_token: str) -> bool:
     
     SECURITY RULE: Does not log reset tokens or passwords.
     """
-    reset_link = f"{FRONTEND_URL}/forgot-password?token={raw_token}"
+    cfg = get_mail_config()
+    reset_link = f"{cfg['frontend_url']}/forgot-password?token={raw_token}"
     subject = "TrustShield AI - Password Reset Request"
 
     text_content = f"""Hello,
@@ -77,11 +98,11 @@ The TrustShield AI Security Team
 </html>
 """
 
-    if SMTP_HOST:
+    if cfg["smtp_host"]:
         try:
             msg = MIMEMultipart("alternative")
             msg["Subject"] = subject
-            msg["From"] = SMTP_FROM_EMAIL
+            msg["From"] = cfg["smtp_from_email"]
             msg["To"] = to_email
 
             part1 = MIMEText(text_content, "plain")
@@ -89,18 +110,18 @@ The TrustShield AI Security Team
             msg.attach(part1)
             msg.attach(part2)
 
-            if SMTP_PORT == 465:
-                with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-                    if SMTP_USER and SMTP_PASSWORD:
-                        server.login(SMTP_USER, SMTP_PASSWORD)
-                    server.sendmail(SMTP_FROM_EMAIL, [to_email], msg.as_string())
+            if cfg["smtp_port"] == 465:
+                with smtplib.SMTP_SSL(cfg["smtp_host"], cfg["smtp_port"], timeout=10) as server:
+                    if cfg["smtp_user"] and cfg["smtp_password"]:
+                        server.login(cfg["smtp_user"], cfg["smtp_password"])
+                    server.sendmail(cfg["smtp_from_email"], [to_email], msg.as_string())
             else:
-                with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-                    if SMTP_TLS:
+                with smtplib.SMTP(cfg["smtp_host"], cfg["smtp_port"], timeout=10) as server:
+                    if cfg["smtp_tls"]:
                         server.starttls()
-                    if SMTP_USER and SMTP_PASSWORD:
-                        server.login(SMTP_USER, SMTP_PASSWORD)
-                    server.sendmail(SMTP_FROM_EMAIL, [to_email], msg.as_string())
+                    if cfg["smtp_user"] and cfg["smtp_password"]:
+                        server.login(cfg["smtp_user"], cfg["smtp_password"])
+                    server.sendmail(cfg["smtp_from_email"], [to_email], msg.as_string())
             return True
         except Exception as e:
             # Note: Do NOT log tokens or passwords
@@ -108,7 +129,7 @@ The TrustShield AI Security Team
             return False
 
     # Safe local development procedure when no SMTP is configured
-    if ENVIRONMENT != "production":
+    if cfg["environment"] != "production":
         try:
             mailbox = []
             if os.path.exists(DEV_MAILBOX_FILE):

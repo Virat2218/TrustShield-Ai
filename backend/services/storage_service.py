@@ -7,17 +7,35 @@ from pathlib import Path
 from typing import Optional, Tuple
 from PIL import Image
 from fastapi import UploadFile, HTTPException
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
 
 # Configurable storage directory (private, outside the public frontend tree)
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_UPLOAD_DIR = str(BASE_DIR / "uploads" / "reports")
-COMMUNITY_UPLOAD_DIR = os.getenv("COMMUNITY_UPLOAD_DIR", DEFAULT_UPLOAD_DIR)
+
+def get_configured_upload_dir() -> Path:
+    env_dir = os.getenv("COMMUNITY_UPLOAD_DIR", "").strip()
+    return Path(env_dir).resolve() if env_dir else Path(DEFAULT_UPLOAD_DIR).resolve()
+
+COMMUNITY_UPLOAD_DIR = str(get_configured_upload_dir())
 
 # Size limit and chunking
-MAX_ATTACHMENT_SIZE_MB = int(os.getenv("MAX_COMMUNITY_ATTACHMENT_SIZE_MB", "5"))
-MAX_ATTACHMENT_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024
+def get_max_attachment_mb() -> int:
+    return int(os.getenv("MAX_COMMUNITY_ATTACHMENT_SIZE_MB", "5"))
+
+def get_max_attachment_bytes() -> int:
+    return get_max_attachment_mb() * 1024 * 1024
+
+MAX_ATTACHMENT_SIZE_MB = get_max_attachment_mb()
+MAX_ATTACHMENT_BYTES = get_max_attachment_bytes()
 STREAM_CHUNK_SIZE = 64 * 1024  # 64 KB
 
 # Allowed raster formats
@@ -31,8 +49,9 @@ class StorageService:
     Designed with a clean interface allowing future integration of S3/cloud object storage.
     """
 
-    def __init__(self, upload_dir: str = COMMUNITY_UPLOAD_DIR):
-        self.upload_dir = Path(upload_dir).resolve()
+    def __init__(self, upload_dir: Optional[str] = None):
+        target = upload_dir if upload_dir is not None else get_configured_upload_dir()
+        self.upload_dir = Path(target).resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
 
     def _resolve_safe_path(self, filename: str) -> Optional[Path]:

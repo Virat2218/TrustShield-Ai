@@ -3,12 +3,26 @@ import os
 import hashlib
 import base64
 import httpx
+from pathlib import Path
 from enum import Enum
 from dataclasses import dataclass
 from urllib.parse import urlparse
 from typing import Optional, List, Dict, Any
+from dotenv import load_dotenv
 
-SAFE_BROWSING_TIMEOUT_SECONDS = float(os.getenv("SAFE_BROWSING_TIMEOUT_SECONDS", "5.0"))
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
+
+def get_safe_browsing_timeout() -> float:
+    try:
+        return float(os.getenv("SAFE_BROWSING_TIMEOUT_SECONDS", "5.0"))
+    except ValueError:
+        return 5.0
+
+SAFE_BROWSING_TIMEOUT_SECONDS = get_safe_browsing_timeout()
 
 class SafeBrowsingStatus(str, Enum):
     THREAT_FOUND = "threat_found"

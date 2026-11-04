@@ -1,10 +1,35 @@
 import os
 import json
+import logging
+from pathlib import Path
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, Boolean, text
+from dotenv import load_dotenv
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    ForeignKey,
+    Boolean,
+    text,
+    inspect,
+)
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trustshield.db")
+logger = logging.getLogger(__name__)
+
+# Ensure .env is loaded before reading DATABASE_URL
+env_path = Path(__file__).resolve().parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trustshield.db").strip()
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
@@ -126,25 +151,55 @@ class PasswordResetToken(Base):
 
     user = relationship("User", back_populates="reset_tokens")
 
-def init_db():
-    Base.metadata.create_all(bind=engine)
-    # Safe migration: ensure is_admin exists on users if sqlite table was created in Phase 2
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0"))
-            conn.commit()
-    except Exception:
-        pass  # Column already exists
+def init_db(target_engine=None):
+    """
+    Initializes database schema and performs safe, non-destructive incremental column migrations.
+    Reports unexpected errors while specifically handling 'column already exists'.
+    """
+    active_engine = target_engine or engine
+    Base.metadata.create_all(bind=active_engine)
 
-    # Safe migration: ensure token_version exists on users for session invalidation
     try:
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 1"))
-            conn.commit()
-    except Exception:
-        pass  # Column already exists
+        inspector = inspect(active_engine)
+        table_names = inspector.get_table_names()
+        if "users" in table_names:
+            existing_cols = {c["name"] for c in inspector.get_columns("users")}
+            dialect_name = active_engine.dialect.name
 
-init_db()
+            # Migration: is_admin
+            if "is_admin" not in existing_cols:
+                try:
+                    with active_engine.connect() as conn:
+                        default_val = "FALSE" if dialect_name == "postgresql" else "0"
+                        conn.execute(text(f"ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT {default_val}"))
+                        conn.commit()
+                        logger.info("Migrated schema: added 'is_admin' to users table.")
+                except Exception as e:
+                    err_msg = str(e).lower()
+                    if "duplicate column" in err_msg or "already exists" in err_msg:
+                        logger.info("Column users.is_admin already exists.")
+                    else:
+                        logger.error(f"Unexpected database migration failure adding users.is_admin: {e}")
+                        raise
+
+            # Migration: token_version
+            if "token_version" not in existing_cols:
+                try:
+                    with active_engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 1"))
+                        conn.commit()
+                        logger.info("Migrated schema: added 'token_version' to users table.")
+                except Exception as e:
+                    err_msg = str(e).lower()
+                    if "duplicate column" in err_msg or "already exists" in err_msg:
+                        logger.info("Column users.token_version already exists.")
+                    else:
+                        logger.error(f"Unexpected database migration failure adding users.token_version: {e}")
+                        raise
+    except Exception as e:
+        if "duplicate column" not in str(e).lower() and "already exists" not in str(e).lower():
+            logger.error(f"Database schema initialization/inspection failed: {e}")
+            raise
 
 def get_db():
     db = SessionLocal()

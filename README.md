@@ -183,9 +183,9 @@ npm run dev
 - Web Application: [http://localhost:5173](http://localhost:5173)
 
 **4. Bootstrap the Initial Administrator:**
-To access the Admin Dashboard ([http://localhost:5173/admin](http://localhost:5173/admin)), bootstrap your registered account as the first administrator:
+To access the Admin Dashboard ([http://localhost:5173/admin/dashboard](http://localhost:5173/admin/dashboard) or shortcut [http://localhost:5173/admin](http://localhost:5173/admin)), bootstrap your registered account as the first administrator:
 ```bash
-# 1. Register an account via the web UI at http://localhost:5173/register
+# 1. Register an account via the web UI at http://localhost:5173/signup
 # 2. Run the one-time bootstrap command:
 cd backend
 source venv/bin/activate
@@ -376,3 +376,44 @@ When developing locally without an active SMTP server (`ENVIRONMENT=development`
   backend/.dev_mailbox.json
   ```
 - Developers and test suites can inspect `backend/.dev_mailbox.json` or use `get_dev_latest_token(email)` to retrieve test reset links without needing a mail server.
+
+---
+
+## 🌐 Production Deployment & Hosting Guide
+
+TrustShield AI supports two production deployment topologies:
+
+### Topology A: Same-Origin / Reverse Proxy (Recommended)
+Both the React frontend (static files) and FastAPI backend are served behind a unified reverse proxy (such as Nginx, Caddy, Cloudflare, Traefik, or AWS ALB):
+- Route `/api/*` to the FastAPI backend (`http://backend:8000`).
+- Route all other requests `/*` to the static Vite build (`dist/index.html`).
+- **Frontend Configuration:** Leave `VITE_API_URL` unset. Axios defaults to the relative `/api` path, eliminating cross-origin preflight latency and CORS complexity.
+- **SPA Deep Linking:** Web server rules redirect all missing routes to `/index.html` (Netlify/Cloudflare `_redirects` and `vercel.json` are included in `frontend/`).
+
+### Topology B: Decoupled / Cross-Origin Services
+The frontend and backend are hosted on separate domains or cloud services (e.g. Vercel frontend + Render/Railway backend):
+1. **Frontend Environment:**
+   Build the frontend with `VITE_API_URL` set to the live backend URL:
+   ```env
+   VITE_API_URL=https://api.yourdomain.com/api
+   ```
+2. **Backend Environment:**
+   Configure explicit allowed origins in `backend/.env`:
+   ```env
+   FRONTEND_URL=https://app.yourdomain.com
+   ALLOWED_ORIGINS=https://app.yourdomain.com
+   ```
+   *Security Note:* The backend strictly prohibits wildcard `*` with credentials. Only explicit origins are permitted.
+
+### Persistence & Production Storage
+- **Database:** SQLite (`DATABASE_URL=sqlite:///./trustshield.db`) is intended for local development only. In production environments where container disks are ephemeral (Render, Heroku, Railway, Fly.io, Kubernetes), use a managed PostgreSQL instance:
+  ```env
+  DATABASE_URL=postgresql://user:password@db-host:5432/trustshield_production
+  ```
+- **Community Attachments:** Attachments are stored on disk. If container storage is ephemeral, configure `COMMUNITY_UPLOAD_DIR` to point to a persistent volume mount (e.g. `/mnt/storage/uploads/reports`).
+- **Secret Hygiene:** Never commit `.env` or development keys. Generate a cryptographically random `JWT_SECRET_KEY` on the production host using:
+  ```bash
+  python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+  ```
+- **Process Binding:** Production startup binds to `--host 0.0.0.0 --port ${PORT:-8000}`.
+
