@@ -61,7 +61,9 @@ export default function NewsVerification() {
       console.error(err);
       const msg =
         err.response?.data?.detail ||
-        (err.code === 'ERR_NETWORK' ? t.errors.network : t.errors.serverError);
+        (err.isConfigurationError || err.code === 'ERR_NETWORK' || !err.response
+          ? 'Unable to connect to TrustShield backend API. Please verify the backend service is running and VITE_API_URL is configured.'
+          : err.message || t.errors.serverError);
       setError(msg);
     } finally {
       setLoading(false);

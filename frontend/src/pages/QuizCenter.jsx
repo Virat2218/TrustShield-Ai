@@ -75,7 +75,12 @@ export default function QuizCenter() {
       setQuizState('playing');
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch quiz questions. Please try again.');
+      setError(
+        err.response?.data?.detail ||
+        (err.isConfigurationError || err.code === 'ERR_NETWORK' || !err.response
+          ? 'Unable to connect to TrustShield backend API. Please verify the backend service is running and VITE_API_URL is configured.'
+          : 'Failed to fetch quiz questions. Please try again.')
+      );
     } finally {
       setLoading(false);
     }
