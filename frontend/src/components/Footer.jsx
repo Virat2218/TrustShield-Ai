@@ -32,6 +32,11 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
+                <Link to="/quick-check" className="hover:text-[#0d766e] transition font-medium text-[#0d766e]">
+                  Quick Safety Check
+                </Link>
+              </li>
+              <li>
                 <Link to="/scan" className="hover:text-[#0d766e] transition">
                   Message Scanner
                 </Link>
@@ -39,6 +44,21 @@ export default function Footer() {
               <li>
                 <Link to="/url-checker" className="hover:text-[#0d766e] transition">
                   Website Link Checker
+                </Link>
+              </li>
+              <li>
+                <Link to="/qr-checker" className="hover:text-[#0d766e] transition">
+                  QR Code Safety Scan
+                </Link>
+              </li>
+              <li>
+                <Link to="/email-checker" className="hover:text-[#0d766e] transition">
+                  Email Sender &amp; Headers
+                </Link>
+              </li>
+              <li>
+                <Link to="/call-checker" className="hover:text-[#0d766e] transition">
+                  Scam Call Checker
                 </Link>
               </li>
               <li>
@@ -57,12 +77,27 @@ export default function Footer() {
           {/* Learn & Community */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">
-              Learn &amp; Community
+              Learn &amp; Support
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
+                <Link to="/learning-center" className="hover:text-[#0d766e] transition">
+                  Safe Learning Center
+                </Link>
+              </li>
+              <li>
+                <Link to="/practice" className="hover:text-[#0d766e] transition">
+                  Scam Practice Simulator
+                </Link>
+              </li>
+              <li>
                 <Link to="/quiz" className="hover:text-[#0d766e] transition">
                   Scam Awareness Quiz
+                </Link>
+              </li>
+              <li>
+                <Link to="/incident-response" className="hover:text-rose-600 font-semibold text-rose-700 transition">
+                  Emergency Incident Guide
                 </Link>
               </li>
               <li>

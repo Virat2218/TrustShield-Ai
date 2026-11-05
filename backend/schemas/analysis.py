@@ -229,3 +229,35 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+
+# ─────────────────────────────────────────────
+# Email Header & Sender Analysis Schemas
+# ─────────────────────────────────────────────
+
+class AuthProtocolVerdict(BaseModel):
+    status: str  # 'PASS', 'FAIL', 'SOFTFAIL', 'NEUTRAL', 'NONE', 'UNKNOWN'
+    details: str
+
+class EmailAnalysisRequest(BaseModel):
+    sender_display_name: Optional[str] = Field(None, max_length=255)
+    sender_email: Optional[str] = Field(None, max_length=255)
+    reply_to: Optional[str] = Field(None, max_length=255)
+    subject: Optional[str] = Field(None, max_length=500)
+    headers_text: Optional[str] = Field(None, max_length=20000)
+    email_body: Optional[str] = Field(None, max_length=10000)
+
+class EmailAnalysisResponse(BaseModel):
+    risk_score: int
+    risk_level: str
+    summary: str
+    warning_signs: list[str]
+    sender_domain: Optional[str] = None
+    reply_to_domain: Optional[str] = None
+    domain_mismatch: bool = False
+    spoofing_suspected: bool = False
+    spf_status: AuthProtocolVerdict
+    dkim_status: AuthProtocolVerdict
+    dmarc_status: AuthProtocolVerdict
+    recommendations: list[str]
+    scan_id: Optional[int] = None
+

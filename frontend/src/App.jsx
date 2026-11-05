@@ -31,6 +31,15 @@ import AdminDashboard from './pages/AdminDashboard';
 import ScamAlerts from './pages/ScamAlerts';
 import AlertDetail from './pages/AlertDetail';
 
+// Phase 4 Tools & Safety Pages
+import QuickCheck from './pages/QuickCheck';
+import QRCodeChecker from './pages/QRCodeChecker';
+import CallChecker from './pages/CallChecker';
+import EmailChecker from './pages/EmailChecker';
+import IncidentResponse from './pages/IncidentResponse';
+import LearningCenter from './pages/LearningCenter';
+import ScamPractice from './pages/ScamPractice';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -60,6 +69,15 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/scan" element={<ScamDetector />} />
                   <Route path="/url-checker" element={<URLChecker />} />
+
+                  {/* Phase 4 Expansion Tools */}
+                  <Route path="/quick-check" element={<QuickCheck />} />
+                  <Route path="/qr-checker" element={<QRCodeChecker />} />
+                  <Route path="/call-checker" element={<CallChecker />} />
+                  <Route path="/email-checker" element={<EmailChecker />} />
+                  <Route path="/incident-response" element={<IncidentResponse />} />
+                  <Route path="/learning-center" element={<LearningCenter />} />
+                  <Route path="/practice" element={<ScamPractice />} />
 
                   {/* Phase 2 Routes */}
                   <Route path="/screenshot" element={<ScreenshotAnalyzer />} />

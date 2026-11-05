@@ -174,6 +174,22 @@ def test_complete_platform_user_flows():
         assert old_auth_check.status_code == 401
         print("    ✅ Prior session token strictly invalidated across devices")
 
+        # 14. Email Sender & Header Checker Endpoint
+        print("\n[13] Email Sender & Header Checker")
+        email_resp = client.post("/api/analyze-email", json={
+            "sender_email": "support@paypal.security-alert-center.top",
+            "sender_display_name": "PayPal Customer Support",
+            "reply_to_email": "fraud-reply@gmail.com",
+            "subject": "Your account is suspended immediately",
+            "headers_text": "Received-SPF: fail\nAuthentication-Results: mx.google.com; dkim=fail; dmarc=fail"
+        })
+        assert email_resp.status_code == 200
+        email_data = email_resp.json()
+        assert email_data["risk_level"] == "High"
+        assert email_data["spoofing_suspected"] is True
+        assert email_data["spf_status"]["status"] == "FAIL"
+        print("    ✅ Email header & sender spoofing analysis verified (High Risk, SPF/DKIM/DMARC: FAIL)")
+
     print("\n" + "=" * 65)
     print("🎉 ALL PLATFORM USER FLOWS VERIFIED SUCCESSFULLY!")
     print("=" * 65)

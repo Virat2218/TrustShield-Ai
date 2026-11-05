@@ -18,6 +18,7 @@ import { useAuth } from '../hooks/useAuth';
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [learnOpen, setLearnOpen] = useState(false);
   const { lang, toggleLanguage, t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
@@ -26,6 +27,7 @@ export default function Navbar() {
   const closeAll = () => {
     setMobileMenuOpen(false);
     setToolsOpen(false);
+    setLearnOpen(false);
   };
 
   return (
@@ -58,14 +60,17 @@ export default function Navbar() {
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setToolsOpen((v) => !v)}
+                onClick={() => {
+                  setToolsOpen((v) => !v);
+                  setLearnOpen(false);
+                }}
                 onBlur={(e) => {
                   if (!e.currentTarget.parentElement.contains(e.relatedTarget)) {
                     setToolsOpen(false);
                   }
                 }}
-                className={`flex items-center gap-1 hover:text-[#0d766e] transition-colors py-2 ${
-                  ['/scan', '/url-checker', '/screenshot', '/news-check'].includes(location.pathname)
+                className={`flex items-center gap-1 hover:text-[#0d766e] transition-colors py-2 cursor-pointer ${
+                  ['/quick-check', '/scan', '/url-checker', '/qr-checker', '/email-checker', '/call-checker', '/screenshot', '/news-check'].includes(location.pathname)
                     ? 'text-[#0d766e] font-semibold'
                     : 'text-slate-700'
                 }`}
@@ -80,53 +85,146 @@ export default function Navbar() {
 
               {toolsOpen && (
                 <div
-                  className="absolute left-0 top-full mt-1 w-56 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 text-xs font-normal"
+                  className="absolute left-0 top-full mt-1 w-64 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 text-xs font-normal"
                   role="menu"
                 >
                   <Link
+                    to="/quick-check"
+                    onClick={() => setToolsOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-[#0d766e] text-xs">Quick Safety Wizard</span>
+                    <span className="text-slate-500 text-[11px]">Instant check router</span>
+                  </Link>
+                  <div className="h-[1px] bg-slate-100 my-1 mx-3" />
+                  <Link
                     to="/scan"
                     onClick={() => setToolsOpen(false)}
-                    className="flex flex-col px-4 py-2.5 hover:bg-slate-50 transition"
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
                   >
-                    <span className="font-semibold text-slate-900 text-sm">Message Scanner</span>
-                    <span className="text-slate-500">Check texts, SMS & WhatsApp</span>
+                    <span className="font-semibold text-slate-900 text-xs">Message Scanner</span>
+                    <span className="text-slate-500 text-[11px]">Check texts, SMS & WhatsApp</span>
                   </Link>
                   <Link
                     to="/url-checker"
                     onClick={() => setToolsOpen(false)}
-                    className="flex flex-col px-4 py-2.5 hover:bg-slate-50 transition"
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
                   >
-                    <span className="font-semibold text-slate-900 text-sm">Website Link Checker</span>
-                    <span className="text-slate-500">Verify suspicious links & URLs</span>
+                    <span className="font-semibold text-slate-900 text-xs">Website Link Checker</span>
+                    <span className="text-slate-500 text-[11px]">Verify suspicious links & URLs</span>
+                  </Link>
+                  <Link
+                    to="/qr-checker"
+                    onClick={() => setToolsOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-slate-900 text-xs">QR Code Safety Scan</span>
+                    <span className="text-slate-500 text-[11px]">Detect UPI traps & hidden URLs</span>
+                  </Link>
+                  <Link
+                    to="/email-checker"
+                    onClick={() => setToolsOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-slate-900 text-xs">Email Sender & Headers</span>
+                    <span className="text-slate-500 text-[11px]">Verify SPF/DKIM & fake domains</span>
+                  </Link>
+                  <Link
+                    to="/call-checker"
+                    onClick={() => setToolsOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-slate-900 text-xs">Scam Call & Voicemail</span>
+                    <span className="text-slate-500 text-[11px]">Review digital arrest & threats</span>
                   </Link>
                   <Link
                     to="/screenshot"
                     onClick={() => setToolsOpen(false)}
-                    className="flex flex-col px-4 py-2.5 hover:bg-slate-50 transition"
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
                   >
-                    <span className="font-semibold text-slate-900 text-sm">Screenshot Analyzer</span>
-                    <span className="text-slate-500">OCR scan of payment or chat</span>
+                    <span className="font-semibold text-slate-900 text-xs">Screenshot Analyzer</span>
+                    <span className="text-slate-500 text-[11px]">OCR scan of payment or chat</span>
                   </Link>
                   <Link
                     to="/news-check"
                     onClick={() => setToolsOpen(false)}
-                    className="flex flex-col px-4 py-2.5 hover:bg-slate-50 transition"
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
                   >
-                    <span className="font-semibold text-slate-900 text-sm">News Claim Verifier</span>
-                    <span className="text-slate-500">Fact-check viral headlines</span>
+                    <span className="font-semibold text-slate-900 text-xs">News Claim Verifier</span>
+                    <span className="text-slate-500 text-[11px]">Fact-check viral headlines</span>
                   </Link>
                 </div>
               )}
             </div>
 
-            <Link
-              to="/quiz"
-              className={`hover:text-[#0d766e] transition-colors ${
-                isActive('/quiz') ? 'text-[#0d766e] font-semibold' : 'text-slate-700'
-              }`}
-            >
-              Learn
-            </Link>
+            {/* Learn Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setLearnOpen((v) => !v);
+                  setToolsOpen(false);
+                }}
+                onBlur={(e) => {
+                  if (!e.currentTarget.parentElement.contains(e.relatedTarget)) {
+                    setLearnOpen(false);
+                  }
+                }}
+                className={`flex items-center gap-1 hover:text-[#0d766e] transition-colors py-2 cursor-pointer ${
+                  ['/learning-center', '/practice', '/quiz', '/incident-response'].includes(location.pathname)
+                    ? 'text-[#0d766e] font-semibold'
+                    : 'text-slate-700'
+                }`}
+                aria-expanded={learnOpen}
+              >
+                Learn
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${learnOpen ? 'rotate-180' : ''}`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              {learnOpen && (
+                <div
+                  className="absolute left-0 top-full mt-1 w-60 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 text-xs font-normal"
+                  role="menu"
+                >
+                  <Link
+                    to="/learning-center"
+                    onClick={() => setLearnOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-slate-900 text-xs">Safe Learning Center</span>
+                    <span className="text-slate-500 text-[11px]">Guides on urgency & APK traps</span>
+                  </Link>
+                  <Link
+                    to="/practice"
+                    onClick={() => setLearnOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-slate-900 text-xs">Scam Practice Simulator</span>
+                    <span className="text-slate-500 text-[11px]">Interactive "Real or Scam?" drill</span>
+                  </Link>
+                  <Link
+                    to="/quiz"
+                    onClick={() => setLearnOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="font-semibold text-slate-900 text-xs">Scam Awareness Quiz</span>
+                    <span className="text-slate-500 text-[11px]">Earn safety badges</span>
+                  </Link>
+                  <div className="h-[1px] bg-slate-100 my-1 mx-3" />
+                  <Link
+                    to="/incident-response"
+                    onClick={() => setLearnOpen(false)}
+                    className="flex flex-col px-4 py-2 hover:bg-rose-50/60 transition"
+                  >
+                    <span className="font-semibold text-rose-700 text-xs">Emergency Incident Guide</span>
+                    <span className="text-slate-500 text-[11px]">Actions if money or OTP sent</span>
+                  </Link>
+                </div>
+              )}
+            </div>
 
             <Link
               to="/alerts"
@@ -244,13 +342,25 @@ export default function Navbar() {
       {/* ── Mobile Drawer ───────────────────────────── */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Tools</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Safety Scanners</p>
           <div className="grid grid-cols-2 gap-2 text-xs">
+            <Link to="/quick-check" onClick={closeAll} className="p-2.5 rounded-xl bg-teal-50 font-semibold text-[#0d766e]">
+              ⚡ Quick Check
+            </Link>
             <Link to="/scan" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
               Message Scanner
             </Link>
             <Link to="/url-checker" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
               Website Link
+            </Link>
+            <Link to="/qr-checker" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
+              QR Code Scanner
+            </Link>
+            <Link to="/email-checker" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
+              Email & Headers
+            </Link>
+            <Link to="/call-checker" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
+              Scam Call Checker
             </Link>
             <Link to="/screenshot" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
               Screenshot
@@ -260,12 +370,25 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2 text-sm">
-            <Link to="/quiz" onClick={closeAll} className="py-1.5 font-medium text-slate-700">
-              Learn (Quiz & Guides)
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 pt-2">Learn & Emergency</p>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <Link to="/learning-center" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
+              Learning Center
             </Link>
+            <Link to="/practice" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
+              Practice Drill
+            </Link>
+            <Link to="/quiz" onClick={closeAll} className="p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800">
+              Awareness Quiz
+            </Link>
+            <Link to="/incident-response" onClick={closeAll} className="p-2.5 rounded-xl bg-rose-50 font-bold text-rose-700">
+              Emergency 1930
+            </Link>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2 text-sm">
             <Link to="/alerts" onClick={closeAll} className="py-1.5 font-medium text-slate-700">
-              Alerts
+              Threat Alerts
             </Link>
             <Link to="/report-scam" onClick={closeAll} className="py-1.5 font-medium text-slate-700">
               Report Scam

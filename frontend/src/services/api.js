@@ -302,4 +302,10 @@ export const getAlertCategories = async () => {
   return response.data;
 };
 
+// Phase 4: Feature 8 - Email Sender & Header Checker
+export const analyzeEmail = async (data) => {
+  const response = await api.post('/analyze-email', data);
+  return response.data;
+};
+
 export default api;

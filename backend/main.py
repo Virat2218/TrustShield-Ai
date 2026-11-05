@@ -27,6 +27,7 @@ from routes.quiz import router as quiz_router
 from routes.community import router as community_router
 from routes.admin import router as admin_router
 from routes.alerts import router as alerts_router
+from routes.email_analysis import router as email_router
 from schemas.analysis import HealthResponse
 
 @asynccontextmanager
@@ -93,6 +94,7 @@ app.include_router(quiz_router, prefix="/api/quiz", tags=["Scam Awareness Quiz"]
 app.include_router(community_router, prefix="/api/community", tags=["Community Scam Reporting"])
 app.include_router(admin_router, prefix="/api/admin", tags=["Admin Management"])
 app.include_router(alerts_router, prefix="/api/alerts", tags=["Scam Alerts Center"])
+app.include_router(email_router, prefix="/api", tags=["Email Header Analysis"])
 
 @app.get("/api/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
