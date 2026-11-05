@@ -1,448 +1,340 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  Shield,
   MessageSquare,
-  Globe,
-  FileText,
+  Link2,
+  Image as ImageIcon,
+  Newspaper,
   ArrowRight,
-  CheckCircle2,
-  Upload,
-  Camera,
-  FileCheck2,
-  Sparkles,
-  Brain,
+  PlayCircle,
   AlertTriangle,
-  Radio,
+  ShieldCheck,
+  ChevronRight,
+  Check,
 } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage';
-
-/** Wraps a card in a Link if `href` is provided */
-function FeatureCard({ icon: Icon, title, description, badge, href }) {
-  const content = (
-    <div className="relative p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-cyan-500/40 hover:bg-white/[0.05] transition-all group h-full flex flex-col">
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-11 h-11 rounded-xl bg-[#0d1635] border border-white/10 group-hover:border-cyan-500/40 flex items-center justify-center transition">
-          <Icon className="w-5 h-5 text-cyan-400" aria-hidden="true" />
-        </div>
-        {badge && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-slate-400">
-            {badge}
-          </span>
-        )}
-      </div>
-      <h3 className="text-base font-semibold text-white mb-2 group-hover:text-cyan-300 transition">
-        {title}
-      </h3>
-      <p className="text-slate-400 text-sm leading-relaxed flex-1">{description}</p>
-      {href && (
-        <div className="mt-4 flex items-center gap-1 text-xs font-medium text-cyan-400 group-hover:text-cyan-300 transition">
-          Try it <ArrowRight className="w-3 h-3" aria-hidden="true" />
-        </div>
-      )}
-    </div>
-  );
-
-  if (href) {
-    return (
-      <Link to={href} className="focus-visible:outline-cyan-400 rounded-2xl block h-full">
-        {content}
-      </Link>
-    );
-  }
-  return content;
-}
 
 export default function Home() {
   const { t } = useLanguage();
 
-  const features = [
-    {
-      icon: MessageSquare,
-      title: t.features.scamDetector.title,
-      description: t.features.scamDetector.desc,
-      badge: 'SMS & Email',
-      href: '/scan',
-    },
-    {
-      icon: Globe,
-      title: t.features.urlChecker.title,
-      description: t.features.urlChecker.desc,
-      badge: 'Links & URLs',
-      href: '/url-checker',
-    },
-    {
-      icon: Camera,
-      title: t.features.screenshotAnalyzer.title,
-      description: t.features.screenshotAnalyzer.desc,
-      badge: 'OCR + AI',
-      href: '/screenshot',
-    },
-    {
-      icon: FileCheck2,
-      title: t.features.newsVerification.title,
-      description: t.features.newsVerification.desc,
-      badge: 'Fact-Check',
-      href: '/news-check',
-    },
-    {
-      icon: FileText,
-      title: t.features.riskReports.title,
-      description: t.features.riskReports.desc,
-      badge: 'PDF Export',
-      href: null,
-    },
-    {
-      icon: Sparkles,
-      title: t.features.multilingual.title,
-      description: t.features.multilingual.desc,
-      badge: 'EN + HI',
-      href: null,
-    },
-  ];
-
-  const steps = [
-    {
-      step: '01',
-      icon: Upload,
-      title: t.howItWorks.step1.title,
-      desc: t.howItWorks.step1.desc,
-    },
-    {
-      step: '02',
-      icon: Shield,
-      title: t.howItWorks.step2.title,
-      desc: t.howItWorks.step2.desc,
-    },
-    {
-      step: '03',
-      icon: CheckCircle2,
-      title: t.howItWorks.step3.title,
-      desc: t.howItWorks.step3.desc,
-    },
-  ];
-
-  const communityTools = [
-    {
-      icon: Brain,
-      title: 'Scam Awareness Quiz',
-      desc: 'Test your knowledge across phishing, UPI fraud, job scams, and more. Get personalised tips based on your score.',
-      href: '/quiz',
-      color: 'text-amber-400',
-      border: 'hover:border-amber-500/40',
-      linkLabel: 'Take the quiz',
-    },
-    {
-      icon: AlertTriangle,
-      title: 'Report a Scam',
-      desc: 'Encountered a suspicious link, number, or message? Submit a community incident report and receive a unique reference ID.',
-      href: '/report-scam',
-      color: 'text-rose-400',
-      border: 'hover:border-rose-500/40',
-      linkLabel: 'File a report',
-    },
-    {
-      icon: Radio,
-      title: 'Scam Alerts',
-      desc: 'Browse active scam advisories curated by our team. Filter by threat type or risk level to stay informed.',
-      href: '/alerts',
-      color: 'text-blue-400',
-      border: 'hover:border-blue-500/40',
-      linkLabel: 'Browse alerts',
-    },
-  ];
-
   return (
-    <div className="space-y-24 pb-24">
+    <div className="relative overflow-hidden bg-white pb-20">
+      {/* ── Soft organic background shape washes ────────────────── */}
+      <div
+        className="absolute top-0 right-0 w-[550px] h-[550px] pointer-events-none -z-10 opacity-70"
+        style={{
+          background: 'radial-gradient(ellipse at 80% 20%, rgba(204, 251, 241, 0.6) 0%, rgba(207, 250, 254, 0.3) 50%, transparent 70%)',
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute top-[250px] left-0 w-[450px] h-[450px] pointer-events-none -z-10 opacity-50"
+        style={{
+          background: 'radial-gradient(circle at 10% 40%, rgba(204, 251, 241, 0.45) 0%, transparent 60%)',
+        }}
+        aria-hidden="true"
+      />
 
-      {/* ─── Hero ─────────────────────────────────────────────── */}
-      <section
-        className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-8"
-        aria-labelledby="hero-heading"
-      >
-        {/* Soft background tint — no pulsing/spinning animations */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-40"
-          aria-hidden="true"
-          style={{
-            background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(14,165,233,0.12) 0%, transparent 100%)',
-          }}
-        />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-16 space-y-20">
 
-        <div className="relative max-w-4xl mx-auto text-center space-y-8 z-10">
+        {/* ─── Hero Section (2 Columns) ─────────────────────────── */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center" aria-labelledby="hero-title">
 
-          {/* Status pill */}
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-cyan-500/25 text-xs font-medium text-cyan-300"
-          >
-            <span
-              className="w-2 h-2 rounded-full bg-cyan-400 motion-safe:animate-pulse"
-              aria-hidden="true"
-            />
-            AI-Powered Scam & Threat Detection
-          </motion.div>
-
-          {/* Heading */}
-          <motion.h1
-            id="hero-heading"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]"
-          >
-            {t.hero.heading}
-          </motion.h1>
-
-          {/* Subheading */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="max-w-2xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed"
-          >
-            {t.hero.subheading}
-          </motion.p>
-
-          {/* Primary CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.22 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2"
-          >
-            <Link
-              to="/scan"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-sm text-white bg-cyan-600 hover:bg-cyan-500 shadow-lg shadow-cyan-700/25 transition"
+          {/* Left Column */}
+          <div className="lg:col-span-6 space-y-6">
+            <h1
+              id="hero-title"
+              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-slate-900 tracking-tight leading-[1.12]"
             >
-              {t.hero.startScan}
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-            <a
-              href="#tools"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-medium text-sm text-slate-300 bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 hover:border-white/20 transition"
-            >
-              {t.hero.exploreFeatures}
-            </a>
-          </motion.div>
-
-          {/* Quick-start links */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-2 pt-4"
-          >
-            {[
-              { label: 'Check a URL', href: '/url-checker' },
-              { label: 'Analyze screenshot', href: '/screenshot' },
-              { label: 'Fact-check news', href: '/news-check' },
-            ].map(({ label, href }) => (
-              <Link
-                key={href}
-                to={href}
-                className="text-xs px-3.5 py-1.5 rounded-full border border-white/10 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40 transition"
-              >
-                {label}
-              </Link>
-            ))}
-          </motion.div>
-
-          {/* Shield icon — static, no spinning */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="pt-8 flex justify-center"
-            aria-hidden="true"
-          >
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#0d1635] border border-cyan-500/30 shadow-xl shadow-cyan-900/20 flex flex-col items-center justify-center gap-2">
-              <Shield className="w-12 h-12 text-cyan-400" />
-              <span className="text-[9px] font-mono uppercase text-cyan-400/70 tracking-widest">
-                TrustShield AI
+              Check before you{' '}
+              <span className="relative inline-block whitespace-nowrap">
+                click.
+                {/* Hand-drawn curved teal underline stroke beneath "click." */}
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-3 text-[#14b8a6]"
+                  viewBox="0 0 100 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 8C25 2 75 2 98 9"
+                    stroke="currentColor"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+            </h1>
 
-      {/* ─── Scan Tools ───────────────────────────────────────── */}
-      <section
-        id="tools"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        aria-labelledby="features-heading"
-      >
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
-            Capabilities
-          </span>
-          <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            {t.features.title}
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base">{t.features.subtitle}</p>
-        </div>
+            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg font-normal">
+              Understand suspicious messages, links, screenshots, and claims in seconds.
+            </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((feat, idx) => (
-            <FeatureCard key={idx} {...feat} />
-          ))}
-        </div>
-      </section>
-
-      {/* ─── How It Works ─────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        aria-labelledby="how-heading"
-      >
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
-            Workflow
-          </span>
-          <h2 id="how-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            {t.howItWorks.title}
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base">{t.howItWorks.subtitle}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {steps.map((step, idx) => {
-            const StepIcon = step.icon;
-            return (
-              <div
-                key={idx}
-                className="p-7 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col"
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <Link
+                to="/scan"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-white bg-[#0d766e] hover:bg-[#0f766e] shadow-sm hover:shadow-md transition cursor-pointer"
               >
-                <div className="flex items-center justify-between mb-5">
-                  <span className="text-3xl font-extrabold font-mono text-white/15">
-                    {step.step}
-                  </span>
-                  <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                    <StepIcon className="w-4.5 h-4.5 text-cyan-400" aria-hidden="true" />
+                <span>Start a free scan</span>
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-slate-800 bg-white border border-slate-300 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+              >
+                <PlayCircle className="w-4 h-4 text-slate-700" aria-hidden="true" />
+                <span>How it works</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: Hero Graphic Card (Pixel-match to design) */}
+          <div className="lg:col-span-6 flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-[460px]">
+
+              {/* Floating Shield Badge top right */}
+              <div className="absolute -top-4 -right-2 z-20 flex flex-col items-center">
+                {/* Subtle rays/motion lines above shield */}
+                <div className="flex gap-1.5 mb-1 opacity-70" aria-hidden="true">
+                  <span className="w-1 h-2 bg-[#0d766e] rounded-full transform -rotate-25"></span>
+                  <span className="w-1 h-3 bg-[#0d766e] rounded-full"></span>
+                  <span className="w-1 h-2 bg-[#0d766e] rounded-full transform rotate-25"></span>
+                </div>
+                {/* 3D Shield */}
+                <div className="w-14 h-16 rounded-2xl bg-gradient-to-b from-[#2dd4bf] to-[#0d766e] p-0.5 shadow-lg shadow-teal-900/15 flex items-center justify-center">
+                  <div className="w-full h-full rounded-[14px] bg-gradient-to-br from-[#14b8a6] to-[#0f766e] flex items-center justify-center text-white">
+                    <Check className="w-7 h-7 stroke-[3]" />
                   </div>
                 </div>
-                <h3 className="text-base font-semibold text-white mb-2">{step.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
               </div>
-            );
-          })}
-        </div>
-      </section>
 
-      {/* ─── Limitations / Transparency notice ───────────────── */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 sm:p-8 space-y-4">
-          <h2 className="text-lg font-semibold text-white">What TrustShield AI can and cannot do</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">What it does</p>
-              <ul className="space-y-1.5 text-slate-400">
-                {[
-                  'Scans messages and URLs using rule-based heuristics',
-                  'Extracts text from screenshots with OCR',
-                  'Checks claims against publicly available information',
-                  'Gives an explainable risk score with reasons',
-                  'Saves your scan history when you are signed in',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">Limitations</p>
-              <ul className="space-y-1.5 text-slate-400">
-                {[
-                  'Cannot guarantee any content is 100% safe or harmful',
-                  'Google Safe Browsing check requires a configured API key',
-                  'AI analysis may miss novel or sophisticated attacks',
-                  'News fact-checking is not a substitute for journalism',
-                  'Password reset emails require SMTP to be configured',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              {/* Main Card Container */}
+              <div className="relative rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-7 shadow-xl shadow-slate-200/60 space-y-4">
+
+                {/* Card Header: Speech bubble icon + "Message analysis" */}
+                <div className="flex items-center gap-2 text-slate-900">
+                  <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-[#0d766e]">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-bold text-sm tracking-tight">Message analysis</h3>
+                </div>
+
+                {/* Suspicious Message Snippet */}
+                <div className="p-3.5 rounded-xl bg-slate-100/80 text-xs sm:text-[13px] text-slate-700 leading-relaxed font-normal">
+                  Your bank account will be blocked today. Verify now:{' '}
+                  <span className="text-blue-600 underline font-medium">bit.ly/bank-verify</span>
+                </div>
+
+                {/* Alert Box */}
+                <div className="rounded-xl bg-[#fffbeb] border border-amber-200 p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-amber-900 font-bold text-xs sm:text-sm">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <span>Suspicious message detected</span>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#fef08a] text-amber-900 shadow-2xs">
+                      Use caution
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    <p className="text-xs font-bold text-slate-900">Why?</p>
+                    <ul className="space-y-1.5 text-xs text-slate-700">
+                      <li className="flex items-start gap-2">
+                        <span className="w-4 h-4 rounded-full bg-[#0d766e] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                          1
+                        </span>
+                        <span>Uses an urgent threat to create pressure.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-4 h-4 rounded-full bg-[#0d766e] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                          2
+                        </span>
+                        <span>Contains a shortened link (bit.ly) that hides the real website.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-4 h-4 rounded-full bg-[#0d766e] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                          3
+                        </span>
+                        <span>Asks you to verify sensitive account details.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ─── Community Tools ──────────────────────────────────── */}
-      <section
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        aria-labelledby="community-heading"
-      >
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
-            Community
-          </span>
-          <h2 id="community-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            Learn, Report &amp; Stay Alert
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base">
-            Beyond scanning — build your awareness and help protect others.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {communityTools.map(({ icon: Icon, title, desc, href, color, border, linkLabel }) => (
-            <div
-              key={href}
-              className={`p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] ${border} transition flex flex-col`}
+        {/* ─── "What would you like to check?" (4 Cards Grid) ────── */}
+        <section className="space-y-8 pt-6" aria-labelledby="check-options-title">
+          <div className="text-center">
+            <h2
+              id="check-options-title"
+              className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight"
             >
-              <div className="mb-4">
-                <div className={`w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center ${color}`}>
-                  <Icon className="w-5 h-5" aria-hidden="true" />
-                </div>
-              </div>
-              <h3 className="text-base font-semibold text-white mb-2">{title}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed flex-1">{desc}</p>
-              <div className="pt-5">
-                <Link
-                  to={href}
-                  className={`inline-flex items-center gap-1.5 text-xs font-semibold ${color} hover:underline transition`}
-                >
-                  {linkLabel}
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              What would you like to check?
+            </h2>
+          </div>
 
-      {/* ─── Bottom CTA ───────────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl bg-[#0d1635] border border-white/10 p-8 sm:p-12 text-center space-y-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Suspect a message or link?
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base max-w-md mx-auto">
-            Run a free scan in seconds. No account required for the main scan tools.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            {/* Card 1: Message */}
             <Link
               to="/scan"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg transition"
+              className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all flex flex-col justify-between space-y-5"
             >
-              Scan Suspicious Message
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#f0fdfa] border border-teal-100 flex items-center justify-center text-[#0d766e] group-hover:scale-105 transition-transform">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Message</h3>
+                <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                  Check texts, emails, or app messages for possible scams, phishing or fraud.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#0d766e] group-hover:text-[#0f766e] transition-colors">
+                <span>Check now</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
             </Link>
+
+            {/* Card 2: Website link */}
             <Link
               to="/url-checker"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-white/[0.06] hover:bg-white/[0.10] text-white border border-white/10 transition"
+              className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all flex flex-col justify-between space-y-5"
             >
-              Check Website URL
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#f0fdfa] border border-teal-100 flex items-center justify-center text-[#0d766e] group-hover:scale-105 transition-transform">
+                  <Link2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Website link</h3>
+                <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                  Analyze a link to see if it's safe, fake, or potentially harmful.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#0d766e] group-hover:text-[#0f766e] transition-colors">
+                <span>Check now</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
             </Link>
+
+            {/* Card 3: Screenshot */}
+            <Link
+              to="/screenshot"
+              className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all flex flex-col justify-between space-y-5"
+            >
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#f0fdfa] border border-teal-100 flex items-center justify-center text-[#0d766e] group-hover:scale-105 transition-transform">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Screenshot</h3>
+                <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                  Upload a screenshot (e.g., a message, post, or offer) to check if it's trustworthy.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#0d766e] group-hover:text-[#0f766e] transition-colors">
+                <span>Check now</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Card 4: News claim */}
+            <Link
+              to="/news-check"
+              className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all flex flex-col justify-between space-y-5"
+            >
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#f0fdfa] border border-teal-100 flex items-center justify-center text-[#0d766e] group-hover:scale-105 transition-transform">
+                  <Newspaper className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">News claim</h3>
+                <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                  Check if a news story, viral message, or popular claim is likely true or false.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#0d766e] group-hover:text-[#0f766e] transition-colors">
+                <span>Check now</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </Link>
+
           </div>
+        </section>
+
+        {/* ─── "Simple steps to stay safer" Strip (Horizontal sequence) ── */}
+        <section id="how-it-works" className="pt-4">
+          <div className="rounded-2xl bg-[#f0fdfa] border border-teal-100 p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-2xs">
+
+            {/* Title on left */}
+            <div className="lg:max-w-[180px] flex-shrink-0">
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">
+                Simple steps to stay safer
+              </h2>
+            </div>
+
+            {/* Steps Sequence with chevrons */}
+            <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 lg:gap-4">
+
+              {/* Step 1 */}
+              <div className="flex items-start gap-3.5 flex-1">
+                <span className="w-7 h-7 rounded-full bg-[#0d766e] text-white font-bold flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                  1
+                </span>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-slate-900">Paste</h3>
+                  <p className="text-xs text-slate-600 leading-snug">
+                    Add a message, link, screenshot or claim.
+                  </p>
+                </div>
+              </div>
+
+              <ChevronRight className="hidden sm:block w-5 h-5 text-slate-400 flex-shrink-0" aria-hidden="true" />
+
+              {/* Step 2 */}
+              <div className="flex items-start gap-3.5 flex-1">
+                <span className="w-7 h-7 rounded-full bg-[#0d766e] text-white font-bold flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                  2
+                </span>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-slate-900">Review</h3>
+                  <p className="text-xs text-slate-600 leading-snug">
+                    Get a clear, easy-to-understand safety analysis in seconds.
+                  </p>
+                </div>
+              </div>
+
+              <ChevronRight className="hidden sm:block w-5 h-5 text-slate-400 flex-shrink-0" aria-hidden="true" />
+
+              {/* Step 3 */}
+              <div className="flex items-start gap-3.5 flex-1">
+                <span className="w-7 h-7 rounded-full bg-[#0d766e] text-white font-bold flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                  3
+                </span>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-slate-900">Decide</h3>
+                  <p className="text-xs text-slate-600 leading-snug">
+                    Use the result to choose your next step with confidence.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Bottom Guidance Note ────────────────────────────── */}
+        <div className="text-center pt-2 pb-6">
+          <p className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-normal">
+            <ShieldCheck className="w-4 h-4 text-slate-400" aria-hidden="true" />
+            <span>Your scan results are guidance. Verify important decisions with official sources.</span>
+          </p>
         </div>
-      </section>
+
+      </div>
     </div>
   );
 }

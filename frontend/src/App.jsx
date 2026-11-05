@@ -44,7 +44,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
-          <div className="min-h-screen bg-[#0c1120] text-slate-100 flex flex-col font-sans">
+          <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans">
             {/* Skip-to-main for keyboard / screen-reader users */}
             <a href="#main-content" className="skip-link">
               Skip to main content

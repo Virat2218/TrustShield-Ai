@@ -1,19 +1,18 @@
 export default function LoadingSpinner({ text = 'Analyzing...' }) {
   return (
     <div
-      className="flex flex-col items-center justify-center py-12 px-4 space-y-5"
+      className="flex flex-col items-center justify-center py-12 px-4 space-y-4"
       role="status"
       aria-live="polite"
       aria-label={text}
     >
-      {/* Spinner ring */}
       <div
-        className="w-12 h-12 rounded-full border-[3px] border-slate-700 border-t-cyan-400 motion-safe:animate-spin"
+        className="w-10 h-10 rounded-full border-[3px] border-slate-200 border-t-[#0d766e] animate-spin"
         aria-hidden="true"
       />
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-slate-200">{text}</p>
-        <p className="text-xs text-slate-500">Checking patterns and indicators…</p>
+      <div className="text-center space-y-0.5">
+        <p className="text-sm font-bold text-slate-800">{text}</p>
+        <p className="text-xs text-slate-500">Evaluating safety indicators and patterns…</p>
       </div>
     </div>
   );

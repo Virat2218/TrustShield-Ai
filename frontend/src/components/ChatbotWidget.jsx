@@ -7,6 +7,7 @@ import {
   Trash2,
   Bot,
   User,
+  Check,
 } from 'lucide-react';
 import { sendChatMessage } from '../services/api';
 import { useLanguage } from '../hooks/useLanguage';
@@ -96,10 +97,12 @@ export default function ChatbotWidget({ currentScanContext = null }) {
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white shadow-xl shadow-cyan-950/40 border border-cyan-400/30 text-xs font-semibold tracking-wide transition cursor-pointer"
+            className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-[#0d766e] hover:bg-[#0f766e] text-white shadow-xl shadow-teal-950/20 text-xs font-bold tracking-wide transition cursor-pointer"
             aria-label="Open AI Safety Assistant"
           >
-            <Shield className="w-4.5 h-4.5 text-white" aria-hidden="true" />
+            <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center text-white">
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
+            </div>
             <span className="hidden sm:inline">AI Safety Assistant</span>
           </button>
         )}
@@ -113,22 +116,22 @@ export default function ChatbotWidget({ currentScanContext = null }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[400px] h-[540px] max-h-[85vh] rounded-2xl bg-[#0f172a] border border-white/10 shadow-2xl shadow-black/70 flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[400px] h-[540px] max-h-[85vh] rounded-3xl bg-white border border-slate-200 shadow-2xl flex flex-col overflow-hidden"
             role="dialog"
             aria-label="AI Safety Assistant Chat"
           >
             {/* Header */}
-            <div className="px-4 py-3 bg-[#0a0f1d] border-b border-white/[0.08] flex items-center justify-between">
+            <div className="px-4 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                  <Shield className="w-4 h-4" aria-hidden="true" />
+                <div className="w-8 h-8 rounded-xl bg-[#0d766e] flex items-center justify-center text-white shadow-xs">
+                  <Check className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white">
+                  <h3 className="text-xs font-bold text-slate-900">
                     {t.chatbot.title}
                   </h3>
-                  <span className="text-[10px] text-slate-400 block">
-                    Digital Safety Advisor
+                  <span className="text-[10px] text-slate-500 block">
+                    Digital Safety Guidance
                   </span>
                 </div>
               </div>
@@ -137,16 +140,16 @@ export default function ChatbotWidget({ currentScanContext = null }) {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition"
-                  title={t.chatbot.clear}
-                  aria-label={t.chatbot.clear}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                  title="Clear chat"
+                  aria-label="Clear chat"
                 >
-                  <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
                   title="Close Assistant"
                   aria-label="Close Assistant"
                 >
@@ -156,7 +159,7 @@ export default function ChatbotWidget({ currentScanContext = null }) {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs" aria-live="polite">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs bg-slate-50/50" aria-live="polite">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
@@ -165,23 +168,23 @@ export default function ChatbotWidget({ currentScanContext = null }) {
                   }`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="w-6 h-6 rounded-md bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center text-cyan-400 flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-md bg-teal-100 text-[#0d766e] flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Bot className="w-3.5 h-3.5" aria-hidden="true" />
                     </div>
                   )}
 
                   <div
-                    className={`max-w-[82%] rounded-xl px-3.5 py-2.5 leading-relaxed whitespace-pre-wrap ${
+                    className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 leading-relaxed whitespace-pre-wrap ${
                       msg.role === 'user'
-                        ? 'bg-cyan-600 text-white shadow-sm'
-                        : 'bg-white/[0.04] border border-white/[0.08] text-slate-200'
+                        ? 'bg-[#0d766e] text-white shadow-xs'
+                        : 'bg-white border border-slate-200 text-slate-800 shadow-2xs'
                     }`}
                   >
                     {msg.content}
                   </div>
 
                   {msg.role === 'user' && (
-                    <div className="w-6 h-6 rounded-md bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-300 flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-md bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <User className="w-3.5 h-3.5" aria-hidden="true" />
                     </div>
                   )}
@@ -189,14 +192,14 @@ export default function ChatbotWidget({ currentScanContext = null }) {
               ))}
 
               {loading && (
-                <div className="flex items-center gap-2 text-slate-400 text-xs py-1" role="status" aria-label="Thinking...">
-                  <div className="w-6 h-6 rounded-md bg-cyan-500/15 flex items-center justify-center text-cyan-400">
+                <div className="flex items-center gap-2 text-slate-500 text-xs py-1" role="status">
+                  <div className="w-6 h-6 rounded-md bg-teal-100 text-[#0d766e] flex items-center justify-center">
                     <Bot className="w-3.5 h-3.5" aria-hidden="true" />
                   </div>
-                  <div className="flex items-center gap-1 bg-white/[0.04] px-3 py-2 rounded-lg border border-white/5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse [animation-delay:0.2s]"></span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse [animation-delay:0.4s]"></span>
+                  <div className="flex items-center gap-1 bg-white px-3 py-2 rounded-xl border border-slate-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0d766e] animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0d766e] animate-pulse [animation-delay:0.2s]"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0d766e] animate-pulse [animation-delay:0.4s]"></span>
                   </div>
                 </div>
               )}
@@ -204,13 +207,13 @@ export default function ChatbotWidget({ currentScanContext = null }) {
             </div>
 
             {/* Quick Questions Pills */}
-            <div className="px-3 py-2 border-t border-white/[0.06] bg-black/20 flex gap-1.5 overflow-x-auto no-scrollbar">
+            <div className="px-3 py-2 border-t border-slate-200 bg-white flex gap-1.5 overflow-x-auto no-scrollbar">
               {quickQuestions.map((q, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => handleSend(q.query)}
-                  className="whitespace-nowrap px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-[10px] text-slate-300 hover:text-cyan-300 transition"
+                  className="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 font-medium transition cursor-pointer"
                 >
                   {q.label}
                 </button>
@@ -218,7 +221,7 @@ export default function ChatbotWidget({ currentScanContext = null }) {
             </div>
 
             {/* Input Bar */}
-            <div className="p-3 bg-[#0a0f1d] border-t border-white/[0.08]">
+            <div className="p-3 bg-white border-t border-slate-200">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -230,17 +233,17 @@ export default function ChatbotWidget({ currentScanContext = null }) {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={t.chatbot.placeholder}
+                  placeholder="Ask a digital safety question..."
                   aria-label="Ask a digital safety question"
-                  className="flex-1 px-3 py-2 rounded-xl bg-black/30 border border-white/[0.08] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-sans"
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0d766e] font-sans"
                 />
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
-                  className="p-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition"
-                  aria-label={t.chatbot.send}
+                  className="p-2.5 rounded-xl bg-[#0d766e] hover:bg-[#0f766e] text-white disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  aria-label="Send question"
                 >
-                  <Send className="w-3.5 h-3.5" aria-hidden="true" />
+                  <Send className="w-4 h-4" aria-hidden="true" />
                 </button>
               </form>
             </div>

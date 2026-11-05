@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Mail, Lock, Key, ArrowRight, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Key, ArrowRight, AlertCircle, CheckCircle, ArrowLeft, Check } from 'lucide-react';
 import { requestPasswordReset, resetPassword } from '../services/api';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -10,7 +10,6 @@ export default function ForgotPassword() {
   const [searchParams] = useSearchParams();
   const urlToken = searchParams.get('token') || '';
 
-  // Step 1: Request reset link | Step 2: Enter token & new password
   const [step, setStep] = useState(urlToken ? 2 : 1);
   const [email, setEmail] = useState('');
   const [token, setToken] = useState(urlToken);
@@ -46,7 +45,6 @@ export default function ForgotPassword() {
       );
     } catch (err) {
       console.error(err);
-      // Ensure generic response behavior even if network errors occur
       setRequestSentMessage(
         'If an account exists with this email address, password reset instructions have been sent.'
       );
@@ -99,19 +97,21 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center px-4 py-12">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md p-8 rounded-3xl bg-[#0d1635]/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 space-y-6"
+        className="w-full max-w-md p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-xl shadow-slate-200/50 space-y-6"
       >
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mx-auto">
-            <Shield className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-[#0d766e] flex items-center justify-center text-white mx-auto shadow-xs">
+            <Check className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            {step === 1 ? t.auth.resetTitle : t.auth.enterTokenTitle}
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            {step === 1 ? 'Reset Password' : 'Confirm New Password'}
           </h1>
-          <p className="text-xs text-slate-400">
-            {step === 1 ? t.auth.resetSubtitle : t.auth.enterTokenSubtitle}
+          <p className="text-xs text-slate-500">
+            {step === 1
+              ? 'Request a secure link to reset your account password.'
+              : 'Enter the single-use reset token and choose a new password.'}
           </p>
         </div>
 
@@ -119,12 +119,12 @@ export default function ForgotPassword() {
           {error && (
             <motion.div
               key="error-box"
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex items-center space-x-2 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300"
+              exit={{ opacity: 0, y: -8 }}
+              className="flex items-center gap-2 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800"
             >
-              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
               <span>{error}</span>
             </motion.div>
           )}
@@ -132,18 +132,18 @@ export default function ForgotPassword() {
           {success && (
             <motion.div
               key="success-box"
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 space-y-2"
+              className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 space-y-2"
             >
-              <div className="flex items-center space-x-2 font-semibold">
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
-                <span>Password Updated</span>
+              <div className="flex items-center gap-2 font-bold text-emerald-900">
+                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                <span>Password Updated Successfully</span>
               </div>
               <p>{success}</p>
               <Link
                 to="/login"
-                className="inline-block mt-2 font-bold text-cyan-400 hover:text-cyan-300 underline"
+                className="inline-block mt-2 font-bold text-[#0d766e] hover:text-[#0f766e] underline"
               >
                 Proceed to Sign In &rarr;
               </Link>
@@ -156,22 +156,25 @@ export default function ForgotPassword() {
           <div className="space-y-4">
             {requestSentMessage && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-200 space-y-2"
+                className="p-4 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 space-y-2"
               >
-                <div className="flex items-center space-x-2 font-semibold text-cyan-300">
-                  <CheckCircle className="w-4 h-4 text-cyan-400" />
+                <div className="flex items-center gap-2 font-bold text-[#0d766e]">
+                  <CheckCircle className="w-4 h-4 text-[#0d766e]" />
                   <span>Check Your Inbox</span>
                 </div>
                 <p>{requestSentMessage}</p>
+                <p className="text-[11px] text-slate-500">
+                  (Note: In environments where SMTP is not configured, tokens are logged to server dev mailbox).
+                </p>
                 <button
                   type="button"
                   onClick={() => {
                     setError('');
                     setStep(2);
                   }}
-                  className="mt-2 text-xs font-bold text-white bg-cyan-600/60 hover:bg-cyan-600 px-3 py-1.5 rounded-lg transition"
+                  className="mt-2 text-xs font-bold text-white bg-[#0d766e] hover:bg-[#0f766e] px-3 py-1.5 rounded-lg transition"
                 >
                   Enter Reset Token &rarr;
                 </button>
@@ -180,11 +183,11 @@ export default function ForgotPassword() {
 
             <form onSubmit={handleRequestReset} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  {t.auth.email}
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
@@ -193,7 +196,7 @@ export default function ForgotPassword() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0d766e] transition"
                   />
                 </div>
               </div>
@@ -201,14 +204,14 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.01] transition disabled:opacity-50 flex items-center justify-center space-x-2"
+                className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[#0d766e] hover:bg-[#0f766e] shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 ) : (
                   <>
-                    <span>{t.auth.sendResetButton}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Send Reset Link</span>
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
                   </>
                 )}
               </button>
@@ -221,9 +224,9 @@ export default function ForgotPassword() {
                   setError('');
                   setStep(2);
                 }}
-                className="text-xs text-slate-400 hover:text-cyan-300 transition"
+                className="text-xs text-slate-500 hover:text-slate-800 transition"
               >
-                {t.auth.haveTokenPrompt} <span className="text-cyan-400 font-semibold underline">Enter Code</span>
+                Already have a reset token? <span className="text-[#0d766e] font-bold underline">Enter Code</span>
               </button>
             </div>
           </div>
@@ -233,11 +236,11 @@ export default function ForgotPassword() {
         {!success && step === 2 && (
           <form onSubmit={handleConfirmReset} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                {t.auth.resetToken}
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Reset Token
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Key className="w-4 h-4" />
                 </div>
                 <input
@@ -245,18 +248,18 @@ export default function ForgotPassword() {
                   required
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  placeholder={t.auth.resetTokenPlaceholder}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition font-mono"
+                  placeholder="Paste your reset token"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0d766e] transition font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                {t.auth.newPassword}
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                New Password (min. 6 characters)
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -265,17 +268,17 @@ export default function ForgotPassword() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0d766e] transition font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                {t.auth.confirmPassword}
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Confirm New Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -284,7 +287,7 @@ export default function ForgotPassword() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0d766e] transition font-mono"
                 />
               </div>
             </div>
@@ -292,14 +295,14 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.01] transition disabled:opacity-50 flex items-center justify-center space-x-2"
+              className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[#0d766e] hover:bg-[#0f766e] shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               ) : (
                 <>
-                  <span>{t.auth.resetButton}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Update Password</span>
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </>
               )}
             </button>
@@ -311,18 +314,18 @@ export default function ForgotPassword() {
                   setError('');
                   setStep(1);
                 }}
-                className="text-xs text-slate-400 hover:text-cyan-300 transition flex items-center justify-center space-x-1 mx-auto"
+                className="text-xs text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1 mx-auto"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>{t.auth.needTokenPrompt} {t.auth.requestReset}</span>
+                <span>Need a reset link? Request one</span>
               </button>
             </div>
           </form>
         )}
 
-        <div className="text-center pt-2 border-t border-white/10 text-xs text-slate-400">
-          <Link to="/login" className="text-cyan-400 hover:text-cyan-300 font-semibold transition">
-            &larr; {t.auth.backToLogin}
+        <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+          <Link to="/login" className="text-[#0d766e] hover:text-[#0f766e] font-bold transition">
+            &larr; Back to Sign In
           </Link>
         </div>
       </motion.div>
