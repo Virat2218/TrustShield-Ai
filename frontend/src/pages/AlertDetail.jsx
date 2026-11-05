@@ -10,6 +10,7 @@ import {
   Share2,
   Check,
   Calendar,
+  RotateCcw,
 } from 'lucide-react';
 import { getPublicAlertDetail } from '../services/api';
 
@@ -26,19 +27,25 @@ export default function AlertDetail() {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    async function fetchDetail() {
-      setLoading(true);
-      try {
-        const data = await getPublicAlertDetail(id);
-        setAlert(data);
-      } catch (err) {
-        console.error(err);
-        setError('The requested advisory could not be found or has been retired.');
-      } finally {
-        setLoading(false);
-      }
+  const fetchDetail = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getPublicAlertDetail(id);
+      setAlert(data);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.status === 404
+          ? 'The requested cybersecurity advisory could not be found or has been retired.'
+          : 'Unable to connect to threat intelligence service. Please check your network and retry.'
+      );
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchDetail();
   }, [id]);
 
@@ -63,12 +70,20 @@ export default function AlertDetail() {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
         <ShieldAlert className="w-12 h-12 text-rose-600 mx-auto" aria-hidden="true" />
-        <h1 className="text-2xl font-bold text-slate-900">Advisory Not Found</h1>
-        <p className="text-slate-500 text-sm">{error}</p>
-        <div className="pt-2">
+        <h1 className="text-2xl font-bold text-slate-900">Advisory Unavailable</h1>
+        <p className="text-slate-500 text-sm">{error || 'Advisory details could not be retrieved.'}</p>
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={fetchDetail}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0d766e] hover:bg-[#0f766e] text-white font-semibold text-xs transition cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Retry Loading</span>
+          </button>
           <Link
             to="/alerts"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0d766e] hover:bg-[#0f766e] text-white font-semibold text-xs transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Scam Alerts
           </Link>
@@ -76,6 +91,10 @@ export default function AlertDetail() {
       </div>
     );
   }
+
+  const preventionList = alert.prevention_tips || alert.recommendations || [];
+  const warningList = Array.isArray(alert.warning_signs) ? alert.warning_signs : [];
+  const publishedDate = alert.published_at || alert.created_at;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-8">
@@ -122,10 +141,10 @@ export default function AlertDetail() {
           <span className="text-xs font-medium text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
             {alert.category}
           </span>
-          {alert.created_at && (
+          {publishedDate && (
             <span className="text-xs text-slate-400 inline-flex items-center gap-1 ml-auto">
               <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
-              {new Date(alert.created_at).toLocaleDateString()}
+              {new Date(publishedDate).toLocaleDateString()}
             </span>
           )}
         </div>
@@ -140,14 +159,14 @@ export default function AlertDetail() {
         </div>
 
         {/* Warning Signs */}
-        {alert.warning_signs && alert.warning_signs.length > 0 && (
+        {warningList.length > 0 && (
           <div className="pt-4 border-t border-slate-100 space-y-3">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-amber-600" aria-hidden="true" />
               Key Red Flags &amp; Warning Signs
             </h2>
             <ul className="space-y-2">
-              {alert.warning_signs.map((sign, i) => (
+              {warningList.map((sign, i) => (
                 <li
                   key={i}
                   className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50/60 border border-amber-200 text-xs text-amber-800"
@@ -161,14 +180,14 @@ export default function AlertDetail() {
         )}
 
         {/* Prevention Recommendations */}
-        {alert.recommendations && alert.recommendations.length > 0 && (
+        {preventionList.length > 0 && (
           <div className="pt-4 border-t border-slate-100 space-y-3">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600" aria-hidden="true" />
               Recommended Safety Precautions
             </h2>
             <div className="space-y-2">
-              {alert.recommendations.map((rec, i) => (
+              {preventionList.map((rec, i) => (
                 <div
                   key={i}
                   className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700"

@@ -6,6 +6,9 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ChatbotWidget from './components/ChatbotWidget';
 
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './pages/NotFound';
+
 // Phase 1 Pages
 import Home from './pages/Home';
 import ScamDetector from './pages/ScamDetector';
@@ -51,64 +54,66 @@ export default function App() {
             </a>
             <Navbar />
             <main id="main-content" className="flex-1">
-              <Routes>
-                {/* Phase 1 Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/scan" element={<ScamDetector />} />
-                <Route path="/url-checker" element={<URLChecker />} />
+              <ErrorBoundary>
+                <Routes>
+                  {/* Phase 1 Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/scan" element={<ScamDetector />} />
+                  <Route path="/url-checker" element={<URLChecker />} />
 
-                {/* Phase 2 Routes */}
-                <Route path="/screenshot" element={<ScreenshotAnalyzer />} />
-                <Route path="/news-check" element={<NewsVerification />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Phase 2 Routes */}
+                  <Route path="/screenshot" element={<ScreenshotAnalyzer />} />
+                  <Route path="/news-check" element={<NewsVerification />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Phase 3 Routes */}
-                <Route path="/quiz" element={<QuizCenter />} />
-                <Route path="/report-scam" element={<ReportScam />} />
-                <Route
-                  path="/my-reports"
-                  element={
-                    <ProtectedRoute>
-                      <MyReports />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/dashboard"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  }
-                />
-                <Route path="/alerts" element={<ScamAlerts />} />
-                <Route path="/alerts/:id" element={<AlertDetail />} />
+                  {/* Phase 3 Routes */}
+                  <Route path="/quiz" element={<QuizCenter />} />
+                  <Route path="/report-scam" element={<ReportScam />} />
+                  <Route
+                    path="/my-reports"
+                    element={
+                      <ProtectedRoute>
+                        <MyReports />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/dashboard"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route path="/alerts" element={<ScamAlerts />} />
+                  <Route path="/alerts/:id" element={<AlertDetail />} />
 
-                {/* Aliases & Backward Compatibility */}
-                <Route path="/register" element={<Navigate to="/signup" replace />} />
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                  {/* Aliases & Backward Compatibility */}
+                  <Route path="/register" element={<Navigate to="/signup" replace />} />
+                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
-                {/* Fallback */}
-                <Route path="*" element={<Home />} />
-              </Routes>
+                  {/* Fallback 404 Route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
             </main>
             <Footer />
             {/* Feature 6: AI Safety Chatbot Floating Widget */}

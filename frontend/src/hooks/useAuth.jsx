@@ -23,9 +23,12 @@ export function AuthProvider({ children }) {
           const profile = await getProfile();
           setUser(profile);
           localStorage.setItem('trustshield_user', JSON.stringify(profile));
-        } catch {
-          // Token expired or invalid
-          logout();
+        } catch (err) {
+          // Only clear session if token is explicitly rejected (401/403)
+          // Do not log out on temporary network disconnection or server restart
+          if (err?.response?.status === 401 || err?.response?.status === 403) {
+            logout();
+          }
         }
       }
       setLoading(false);

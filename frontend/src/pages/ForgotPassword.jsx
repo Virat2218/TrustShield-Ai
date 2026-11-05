@@ -166,7 +166,7 @@ export default function ForgotPassword() {
                 </div>
                 <p>{requestSentMessage}</p>
                 <p className="text-[11px] text-slate-500">
-                  (Note: In environments where SMTP is not configured, tokens are logged to server dev mailbox).
+                  If you do not see the email, please check your spam folder or verify your email address.
                 </p>
                 <button
                   type="button"

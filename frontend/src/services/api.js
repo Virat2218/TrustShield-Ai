@@ -29,6 +29,34 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Intercept responses to prevent HTML documents from being parsed as valid JSON responses
+api.interceptors.response.use(
+  (response) => {
+    if (
+      typeof response.data === 'string' &&
+      (response.data.trim().startsWith('<!DOCTYPE html>') || response.data.includes('<html'))
+    ) {
+      const err = new Error(
+        'Backend API returned an HTML document instead of JSON. Ensure your live backend is running and VITE_API_URL is configured in your deployment settings.'
+      );
+      err.isConfigurationError = true;
+      return Promise.reject(err);
+    }
+    return response;
+  },
+  (error) => {
+    if (
+      error.response &&
+      typeof error.response.data === 'string' &&
+      (error.response.data.includes('<!DOCTYPE html>') || error.response.data.includes('<html'))
+    ) {
+      error.message =
+        'Backend API route could not be reached (received HTML page). Check VITE_API_URL and deployment routing.';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Phase 1 APIs
 export const analyzeMessage = async (message) => {
   const response = await api.post('/analyze-message', { message });

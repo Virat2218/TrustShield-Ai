@@ -12,6 +12,7 @@ import {
   Share2,
   Filter,
   Check,
+  RotateCcw,
 } from 'lucide-react';
 import { getPublicAlerts, getAlertCategories } from '../services/api';
 
@@ -28,13 +29,16 @@ export default function ScamAlerts() {
   const [selectedRisk, setSelectedRisk] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     async function fetchCategories() {
       try {
         const cats = await getAlertCategories();
-        setCategories(cats);
+        if (Array.isArray(cats)) {
+          setCategories(cats);
+        }
       } catch (err) {
         console.error('Failed to load categories', err);
       }
@@ -42,23 +46,33 @@ export default function ScamAlerts() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    async function fetchAlerts() {
-      setLoading(true);
-      try {
-        const data = await getPublicAlerts({
-          category: selectedCategory === 'all' ? undefined : selectedCategory,
-          risk_level: selectedRisk === 'all' ? undefined : selectedRisk,
-          search: searchQuery.trim() || undefined,
-        });
-        setAlerts(data.items || []);
-      } catch (err) {
-        console.error('Failed to load alerts', err);
-      } finally {
-        setLoading(false);
+  const fetchAlerts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getPublicAlerts({
+        category: selectedCategory === 'all' ? undefined : selectedCategory,
+        risk_level: selectedRisk === 'all' ? undefined : selectedRisk,
+        search: searchQuery.trim() || undefined,
+      });
+      if (data && Array.isArray(data.items)) {
+        setAlerts(data.items);
+      } else if (Array.isArray(data)) {
+        setAlerts(data);
+      } else {
+        setAlerts([]);
       }
+    } catch (err) {
+      console.error('Failed to load alerts', err);
+      setError(
+        err.message || 'Unable to connect to threat advisory intelligence. Please check your connection and retry.'
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     const timer = setTimeout(() => {
       fetchAlerts();
     }, 250);
@@ -166,7 +180,7 @@ export default function ScamAlerts() {
           >
             All Categories
           </button>
-          {categories.map((cat) => (
+          {Array.isArray(categories) && categories.map((cat) => (
             <button
               key={cat}
               type="button"
@@ -183,8 +197,24 @@ export default function ScamAlerts() {
         </div>
       </div>
 
-      {/* Alerts Grid */}
-      {loading ? (
+      {/* Alerts Grid & State Handling */}
+      {error ? (
+        <div className="text-center py-12 px-6 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-4">
+          <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto" aria-hidden="true" />
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-slate-900">Unable to Load Scam Advisories</h2>
+            <p className="text-xs text-slate-600 max-w-md mx-auto">{error}</p>
+          </div>
+          <button
+            type="button"
+            onClick={fetchAlerts}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0d766e] hover:bg-[#0f766e] text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Retry Connection</span>
+          </button>
+        </div>
+      ) : loading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3" role="status" aria-label="Loading advisories...">
           <div className="w-8 h-8 rounded-full border-2 border-slate-300 border-t-teal-600 animate-spin" aria-hidden="true"></div>
           <p className="text-slate-500 text-sm">Searching advisories...</p>

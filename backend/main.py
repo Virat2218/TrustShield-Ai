@@ -49,12 +49,18 @@ app = FastAPI(
 )
 
 # CORS configuration
-raw_allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
+default_origins = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,https://trust-shield-ai-phi.vercel.app"
+raw_allowed_origins = os.getenv("ALLOWED_ORIGINS", default_origins)
 allowed_origins = [o.strip() for o in raw_allowed_origins.split(",") if o.strip()]
 
 frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
 if frontend_url and frontend_url not in allowed_origins:
     allowed_origins.append(frontend_url)
+
+# Always ensure the deployed Vercel production domain is whitelisted
+vercel_prod = "https://trust-shield-ai-phi.vercel.app"
+if vercel_prod not in allowed_origins:
+    allowed_origins.append(vercel_prod)
 
 # Per W3C CORS specification: allow_credentials cannot be True if allow_origins contains wildcard "*"
 if not allowed_origins or "*" in allowed_origins:
