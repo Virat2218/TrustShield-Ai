@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  HelpCircle,
   Award,
   CheckCircle2,
-  XCircle,
   RotateCcw,
   ArrowRight,
-  Shield,
   Lightbulb,
-  Clock,
-  BookOpen,
-  Sparkles,
   ChevronRight,
   History,
+  X,
 } from 'lucide-react';
 import {
   getQuizCategories,
@@ -23,7 +18,6 @@ import {
 } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function QuizCenter() {
   const { t } = useLanguage();
@@ -147,83 +141,90 @@ export default function QuizCenter() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider">
-          <Award className="w-3.5 h-3.5" />
-          <span>Cyber Threat Awareness Lab</span>
+      <header className="space-y-2">
+        <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-widest">
+          <Award className="w-3.5 h-3.5" aria-hidden="true" />
+          Interactive Awareness
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Scam Awareness Center
+          Scam Awareness Quiz
         </h1>
-        <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-          Test your fraud defense reflexes against real-world social engineering, UPI traps, and deceptive phishing tactics.
+        <p className="text-slate-400 text-sm sm:text-base max-w-xl">
+          Test your recognition of common fraud patterns including UPI deception, fake banking notices,
+          and social engineering tactics.
         </p>
 
         {isAuthenticated && quizState === 'setup' && (
           <div className="pt-2">
             <button
+              type="button"
               onClick={handleViewHistory}
-              className="inline-flex items-center space-x-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-medium"
+              className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition cursor-pointer"
             >
-              <History className="w-3.5 h-3.5" />
+              <History className="w-3.5 h-3.5" aria-hidden="true" />
               <span>View Past Quiz Attempts</span>
             </button>
           </div>
         )}
-      </div>
+      </header>
 
       {/* ─── State 1: Setup / Category Selection ────────────────────────── */}
       {quizState === 'setup' && (
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl bg-[#0d1635]/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 shadow-2xl space-y-6"
+          className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 sm:p-8 space-y-6"
         >
           {/* Category Selection */}
           <div className="space-y-3">
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              1. Select Scam Threat Category
+              1. Select Topic
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Scam threat category">
               {categories.map((cat) => (
-                <div
+                <button
                   key={cat.id}
+                  type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`p-4 rounded-2xl border transition cursor-pointer text-left ${
+                  role="radio"
+                  aria-checked={selectedCategory === cat.id}
+                  className={`p-4 rounded-xl border transition text-left cursor-pointer ${
                     selectedCategory === cat.id
-                      ? 'border-cyan-400 bg-cyan-500/15 shadow-lg shadow-cyan-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]'
+                      ? 'border-cyan-400 bg-cyan-500/10'
+                      : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-sm text-white">{cat.name}</span>
                     {selectedCategory === cat.id && (
-                      <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                      <CheckCircle2 className="w-4 h-4 text-cyan-400" aria-hidden="true" />
                     )}
                   </div>
                   <p className="text-xs text-slate-400 line-clamp-2">{cat.description}</p>
-                </div>
+                </button>
               ))}
             </div>
           </div>
 
           {/* Difficulty Selection */}
-          <div className="space-y-3 pt-2 border-t border-white/10">
+          <div className="space-y-3 pt-3 border-t border-white/[0.06]">
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              2. Select Difficulty Level
+              2. Select Difficulty
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Difficulty level">
               {difficulties.map((diff) => (
                 <button
                   key={diff}
                   type="button"
                   onClick={() => setSelectedDifficulty(diff)}
-                  className={`py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider border transition text-center ${
+                  role="radio"
+                  aria-checked={selectedDifficulty === diff}
+                  className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition text-center cursor-pointer border ${
                     selectedDifficulty === diff
-                      ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300 shadow-md shadow-cyan-500/10'
-                      : 'border-white/10 bg-white/[0.02] text-slate-400 hover:text-white hover:border-white/20'
+                      ? 'border-cyan-400 bg-cyan-500/15 text-cyan-300'
+                      : 'border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:border-white/20'
                   }`}
                 >
                   {diff}
@@ -239,18 +240,19 @@ export default function QuizCenter() {
           )}
 
           {/* Start CTA */}
-          <div className="pt-4 flex justify-end">
+          <div className="pt-2 flex justify-end border-t border-white/[0.06]">
             <button
+              type="button"
               onClick={handleStartQuiz}
               disabled={loading}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.01] transition disabled:opacity-50 flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-7 py-3 rounded-xl text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-500 shadow-md shadow-cyan-900/30 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               ) : (
                 <>
-                  <span>Begin Awareness Challenge</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Start Quiz</span>
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </>
               )}
             </button>
@@ -262,9 +264,9 @@ export default function QuizCenter() {
       {quizState === 'playing' && currentQuestion && (
         <motion.div
           key={currentQuestion.id}
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
-          className="rounded-3xl bg-[#0d1635]/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 shadow-2xl space-y-6"
+          className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 sm:p-8 space-y-6"
         >
           {/* Progress Bar & Header */}
           <div className="space-y-2">
@@ -272,44 +274,46 @@ export default function QuizCenter() {
               <span className="font-semibold text-cyan-400 uppercase tracking-wider text-[11px]">
                 Question {currentIndex + 1} of {questions.length}
               </span>
-              <span className="font-mono text-slate-500">
-                {currentQuestion.category.toUpperCase()} • {currentQuestion.difficulty}
+              <span className="text-slate-500">
+                {currentQuestion.category} &bull; {currentQuestion.difficulty}
               </span>
             </div>
             {/* Visual Bar */}
-            <div className="w-full h-2 rounded-full bg-black/40 overflow-hidden border border-white/5">
-              <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 to-cyan-400"
-                initial={{ width: 0 }}
-                animate={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-                transition={{ duration: 0.3 }}
+            <div className="w-full h-1.5 rounded-full bg-black/40 overflow-hidden border border-white/5">
+              <div
+                className="h-full bg-cyan-500 transition-all duration-300"
+                style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
               />
             </div>
           </div>
 
           {/* Question Text */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/5">
-            <h3 className="text-base sm:text-lg font-semibold text-white leading-relaxed">
+          <div className="p-4 sm:p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+            <h2 className="text-base sm:text-lg font-semibold text-white leading-relaxed">
               {currentQuestion.question}
-            </h3>
+            </h2>
           </div>
 
           {/* Multiple Choice Options */}
-          <div className="space-y-3">
+          <div className="space-y-2.5" role="radiogroup" aria-label="Quiz question options">
             {currentQuestion.options.map((opt, idx) => {
               const isSelected = selectedOption === idx;
               return (
-                <div
+                <button
                   key={idx}
+                  type="button"
                   onClick={() => handleSelectOption(idx)}
-                  className={`p-4 rounded-2xl border transition cursor-pointer flex items-start space-x-3 text-left ${
+                  role="radio"
+                  aria-checked={isSelected}
+                  disabled={currentAnswered}
+                  className={`w-full p-4 rounded-xl border transition cursor-pointer flex items-start gap-3 text-left ${
                     isSelected
-                      ? 'border-cyan-400 bg-cyan-500/15 text-white'
-                      : 'border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20 hover:bg-white/[0.04]'
-                  }`}
+                      ? 'border-cyan-400 bg-cyan-500/10 text-white'
+                      : 'border-white/[0.08] bg-white/[0.02] text-slate-300 hover:border-white/20 hover:bg-white/[0.04]'
+                  } disabled:cursor-default`}
                 >
                   <span
-                    className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5 border ${
+                    className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5 border ${
                       isSelected
                         ? 'border-cyan-400 bg-cyan-400 text-slate-900'
                         : 'border-white/20 bg-black/40 text-slate-400'
@@ -318,36 +322,39 @@ export default function QuizCenter() {
                     {String.fromCharCode(65 + idx)}
                   </span>
                   <span className="text-xs sm:text-sm leading-relaxed">{opt}</span>
-                </div>
+                </button>
               );
             })}
           </div>
 
           {/* Actions: Confirm or Next */}
-          <div className="pt-2 flex items-center justify-between border-t border-white/10">
+          <div className="pt-3 flex items-center justify-between border-t border-white/[0.06]">
             <button
+              type="button"
               onClick={() => setQuizState('setup')}
-              className="text-xs text-slate-400 hover:text-white transition flex items-center space-x-1"
+              className="text-xs text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Quit Quiz</span>
             </button>
 
             {!currentAnswered ? (
               <button
+                type="button"
                 onClick={handleConfirmAnswer}
                 disabled={selectedOption === null}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-500 shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-cyan-600 hover:bg-cyan-500 shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                Submit Answer
+                Confirm Choice
               </button>
             ) : (
               <button
+                type="button"
                 onClick={handleNextQuestion}
-                className="px-7 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition flex items-center space-x-2"
+                className="px-7 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-cyan-600 hover:bg-cyan-500 shadow-md transition flex items-center gap-1.5 cursor-pointer"
               >
-                <span>{currentIndex + 1 === questions.length ? 'Finish Quiz' : 'Next Question'}</span>
-                <ChevronRight className="w-4 h-4" />
+                <span>{currentIndex + 1 === questions.length ? 'View Results' : 'Next Scenario'}</span>
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -359,27 +366,24 @@ export default function QuizCenter() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-3xl bg-[#0d1635]/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 shadow-2xl space-y-8"
+          className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 sm:p-8 space-y-6"
         >
           {/* Score Header */}
-          <div className="text-center space-y-4 pb-6 border-b border-white/10">
-            <div className="w-20 h-20 rounded-3xl mx-auto bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-xl shadow-cyan-500/20">
-              <div className="w-full h-full bg-[#0a0e1a] rounded-3xl flex flex-col items-center justify-center">
-                <span className="text-2xl font-black text-cyan-400">{quizResult.percentage}%</span>
-              </div>
+          <div className="text-center space-y-3 pb-6 border-b border-white/[0.06]">
+            <div className="w-16 h-16 rounded-2xl mx-auto bg-white/[0.04] border border-cyan-500/30 flex flex-col items-center justify-center">
+              <span className="text-xl font-black text-cyan-400 font-mono">{quizResult.percentage}%</span>
             </div>
             <div>
-              <h2 className="text-2xl font-extrabold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
                 {quizResult.percentage >= 80
-                  ? 'Cyber Vigilance Master!'
+                  ? 'Strong Safety Recognition'
                   : quizResult.percentage >= 50
-                  ? 'Good Safety Awareness'
-                  : 'High Threat Exposure'}
+                  ? 'Moderate Safety Awareness'
+                  : 'Needs Practice with Common Scams'}
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                You correctly answered <span className="text-white font-bold">{quizResult.score}</span> out of{' '}
-                <span className="text-white font-bold">{quizResult.total_questions}</span> scenarios (
-                {quizResult.percentage}% accuracy).
+                You correctly answered <span className="text-white font-bold">{quizResult.score}</span> of{' '}
+                <span className="text-white font-bold">{quizResult.total_questions}</span> questions.
               </p>
             </div>
           </div>
@@ -387,14 +391,14 @@ export default function QuizCenter() {
           {/* Recommendations for Improvement */}
           {quizResult.recommendations && quizResult.recommendations.length > 0 && (
             <div className="space-y-3">
-              <div className="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                <Lightbulb className="w-4 h-4" />
-                <span>Recommended Safety Takeaways</span>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                <Lightbulb className="w-4 h-4" aria-hidden="true" />
+                <span>Key Safety Rules to Remember</span>
               </div>
               <div className="space-y-2">
                 {quizResult.recommendations.map((rec, i) => (
-                  <div key={i} className="p-3.5 rounded-xl bg-cyan-500/[0.05] border border-cyan-500/20 text-xs text-cyan-200 flex items-start space-x-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <div key={i} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-slate-300 flex items-start gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <span>{rec}</span>
                   </div>
                 ))}
@@ -405,17 +409,17 @@ export default function QuizCenter() {
           {/* Detailed Question Review & Explanations */}
           <div className="space-y-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              Scenario-by-Scenario Review
+              Scenario Breakdown
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {quizResult.results.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`p-4 rounded-2xl border ${
+                  className={`p-4 rounded-xl border ${
                     item.is_correct
                       ? 'border-emerald-500/30 bg-emerald-500/[0.03]'
                       : 'border-rose-500/30 bg-rose-500/[0.03]'
-                  } space-y-3`}
+                  } space-y-2.5`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-xs sm:text-sm font-semibold text-white">
@@ -433,7 +437,7 @@ export default function QuizCenter() {
                   </div>
 
                   {/* Options status */}
-                  <div className="space-y-1.5 text-xs">
+                  <div className="space-y-1 text-xs">
                     <p className="text-slate-400">
                       Your answer:{' '}
                       <span className={item.is_correct ? 'text-emerald-400 font-medium' : 'text-rose-400 font-medium'}>
@@ -448,8 +452,8 @@ export default function QuizCenter() {
                   </div>
 
                   {/* Explanation */}
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-300 leading-relaxed">
-                    <strong className="text-cyan-400">Safety Rule: </strong>
+                  <div className="p-3 rounded-lg bg-black/30 border border-white/[0.05] text-xs text-slate-300 leading-relaxed">
+                    <strong className="text-cyan-400">Why: </strong>
                     {item.explanation}
                   </div>
                 </div>
@@ -458,41 +462,49 @@ export default function QuizCenter() {
           </div>
 
           {/* Restart Button */}
-          <div className="pt-4 flex justify-center">
+          <div className="pt-2 flex justify-center border-t border-white/[0.06]">
             <button
+              type="button"
               onClick={() => {
                 setQuizState('setup');
                 setQuizResult(null);
               }}
-              className="px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition flex items-center space-x-2"
+              className="px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-cyan-600 hover:bg-cyan-500 shadow-md transition flex items-center gap-2 cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span>Take Another Challenge</span>
+              <RotateCcw className="w-4 h-4" aria-hidden="true" />
+              <span>Take Another Quiz</span>
             </button>
           </div>
         </motion.div>
       )}
 
-      {/* History Modal / Drawer */}
+      {/* History Modal */}
       <AnimatePresence>
         {showHistory && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Past Quiz Records"
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-3xl bg-[#0a0e1a] border border-white/15 p-6 shadow-2xl space-y-4"
+              className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl bg-[#0f172a] border border-white/10 p-6 shadow-2xl space-y-4"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-cyan-400">
-                  <History className="w-4 h-4" />
-                  <span>My Past Quiz Records</span>
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-400">
+                  <History className="w-4 h-4" aria-hidden="true" />
+                  <span>Past Quiz Attempts</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowHistory(false)}
-                  className="text-slate-400 hover:text-white text-xs"
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition"
+                  aria-label="Close past attempts"
                 >
-                  Close
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
 
@@ -501,15 +513,15 @@ export default function QuizCenter() {
                   No completed quiz attempts found for this account.
                 </p>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {historyList.map((h) => (
                     <div
                       key={h.id}
-                      className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between text-xs"
+                      className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between text-xs"
                     >
                       <div>
                         <span className="font-semibold text-white capitalize block">
-                          {h.category} • {h.difficulty}
+                          {h.category} &bull; {h.difficulty}
                         </span>
                         <span className="text-[10px] text-slate-500">
                           {new Date(h.created_at).toLocaleDateString()}
@@ -531,4 +543,3 @@ export default function QuizCenter() {
     </div>
   );
 }
-

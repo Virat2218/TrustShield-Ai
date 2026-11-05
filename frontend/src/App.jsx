@@ -44,9 +44,13 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
-          <div className="min-h-screen bg-[#0a0e1a] text-white flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+          <div className="min-h-screen bg-[#0c1120] text-slate-100 flex flex-col font-sans">
+            {/* Skip-to-main for keyboard / screen-reader users */}
+            <a href="#main-content" className="skip-link">
+              Skip to main content
+            </a>
             <Navbar />
-            <main className="flex-1">
+            <main id="main-content" className="flex-1">
               <Routes>
                 {/* Phase 1 Routes */}
                 <Route path="/" element={<Home />} />

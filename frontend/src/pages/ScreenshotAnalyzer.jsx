@@ -8,13 +8,16 @@ import {
   Send,
   AlertCircle,
   FileText,
-  Info,
   CheckCircle,
 } from 'lucide-react';
 import { analyzeScreenshot } from '../services/api';
 import RiskReport from '../components/RiskReport';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useLanguage } from '../hooks/useLanguage';
+
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const MAX_SIZE_MB = 5;
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export default function ScreenshotAnalyzer() {
   const { t } = useLanguage();
@@ -27,18 +30,14 @@ export default function ScreenshotAnalyzer() {
   const [result, setResult] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
-
   const validateAndSetFile = (file) => {
     if (!file) return;
 
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!allowed.includes(file.type)) {
-      setError('Unsupported file type. Please upload a PNG, JPG, JPEG, or WEBP image.');
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Unsupported file type. Please upload a PNG, JPEG, or WEBP image.');
       return;
     }
-
-    if (file.size > maxSizeBytes) {
+    if (file.size > MAX_SIZE_BYTES) {
       setError(t.errors.fileTooLarge);
       return;
     }
@@ -52,22 +51,12 @@ export default function ScreenshotAnalyzer() {
     reader.readAsDataURL(file);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      validateAndSetFile(e.dataTransfer.files[0]);
-    }
+    if (e.dataTransfer.files?.[0]) validateAndSetFile(e.dataTransfer.files[0]);
   };
 
   const handleRemoveImage = () => {
@@ -92,7 +81,6 @@ export default function ScreenshotAnalyzer() {
       const data = await analyzeScreenshot(selectedFile);
       setResult(data);
     } catch (err) {
-      console.error(err);
       const msg =
         err.response?.data?.detail ||
         (err.code === 'ERR_NETWORK' ? t.errors.network : t.errors.serverError);
@@ -103,121 +91,139 @@ export default function ScreenshotAnalyzer() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-8">
-      {/* Page Header */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider">
-          <Camera className="w-3.5 h-3.5" />
-          <span>Optical Character Recognition &amp; Scam Detection</span>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-8">
+
+      {/* Page header */}
+      <header className="space-y-2">
+        <div className="flex items-center gap-2 text-cyan-400 text-xs font-semibold uppercase tracking-widest">
+          <Camera className="w-3.5 h-3.5" aria-hidden="true" />
+          Screenshot Analysis
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           {t.screenshotAnalyzer.title}
         </h1>
-        <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-          {t.screenshotAnalyzer.subtitle}
+        <p className="text-slate-400 text-sm sm:text-base max-w-xl">
+          Upload a screenshot of a suspicious chat, payment confirmation, SMS, or email. We
+          extract the text using OCR (Tesseract) and then analyse it for scam indicators.
         </p>
-      </div>
+      </header>
 
-      {/* Main Upload Box */}
-      <div className="relative rounded-3xl bg-[#0d1635]/70 backdrop-blur-md border border-white/10 p-6 md:p-8 shadow-2xl shadow-black/40">
+      {/* Upload area */}
+      <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 md:p-8 space-y-5">
+
         {!previewUrl ? (
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center space-y-4 ${
-              isDragging
-                ? 'border-cyan-400 bg-cyan-500/10 scale-[1.01]'
-                : 'border-white/20 hover:border-cyan-500/50 hover:bg-white/[0.02]'
-            }`}
-          >
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={(e) => validateAndSetFile(e.target.files[0])}
-              accept="image/png, image/jpeg, image/jpg, image/webp"
-              className="hidden"
-            />
-            <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-              <UploadCloud className="w-8 h-8" />
-            </div>
+          <>
+            {/* Dropzone */}
             <div>
-              <p className="text-base font-semibold text-white">
-                {t.screenshotAnalyzer.dropzone}
+              <p className="text-sm font-medium text-slate-200 mb-3">
+                Select or drag an image
               </p>
-              <p className="text-xs text-slate-400 mt-1">
-                {t.screenshotAnalyzer.formats}
+
+              {/* Hidden real input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                id="screenshot-upload"
+                onChange={(e) => validateAndSetFile(e.target.files[0])}
+                accept={ALLOWED_TYPES.join(',')}
+                className="sr-only"
+                aria-describedby="upload-hint"
+              />
+
+              {/* Visual dropzone — acts as label for the input */}
+              <label
+                htmlFor="screenshot-upload"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex flex-col items-center justify-center gap-4 border-2 border-dashed rounded-xl p-10 cursor-pointer transition-colors select-none ${
+                  isDragging
+                    ? 'border-cyan-400 bg-cyan-500/[0.07]'
+                    : 'border-white/20 hover:border-white/30 hover:bg-white/[0.02]'
+                }`}
+                aria-label="Upload screenshot — click to browse or drag and drop"
+              >
+                <div className="w-14 h-14 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
+                  <UploadCloud className="w-7 h-7 text-slate-400" aria-hidden="true" />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-medium text-white">
+                    {t.screenshotAnalyzer.dropzone}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    PNG, JPEG, WEBP — max {MAX_SIZE_MB}&thinsp;MB
+                  </p>
+                </div>
+                <span className="px-5 py-2 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] text-sm font-semibold text-white border border-white/10 transition">
+                  Browse files
+                </span>
+              </label>
+
+              <p id="upload-hint" className="mt-2 text-xs text-slate-500">
+                Uploaded images are processed for text extraction only and are not permanently stored.
               </p>
-              <div className="mt-2 inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-mono">
-                <Info className="w-3 h-3 text-cyan-400" />
-                <span>PNG, JPEG, WEBP • Max 5 MB</span>
-              </div>
             </div>
-            <button
-              type="button"
-              className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold text-white border border-white/10 transition"
-            >
-              Browse Files
-            </button>
-          </div>
+          </>
         ) : (
-          <div className="space-y-6">
-            {/* Image Preview Card */}
-            <div className="relative rounded-2xl bg-black/40 border border-white/10 p-4 flex flex-col sm:flex-row items-center gap-6 overflow-hidden">
-              <div className="w-full sm:w-48 h-48 rounded-xl bg-black/60 border border-white/5 overflow-hidden flex items-center justify-center flex-shrink-0">
+          /* Preview card */
+          <div className="space-y-5">
+            <div className="rounded-xl bg-black/30 border border-white/[0.08] p-4 flex flex-col sm:flex-row items-center gap-5">
+              <div className="w-full sm:w-40 h-40 rounded-lg bg-black/40 border border-white/[0.05] overflow-hidden flex items-center justify-center flex-shrink-0">
                 <img
                   src={previewUrl}
-                  alt="Screenshot preview"
+                  alt="Preview of your uploaded screenshot"
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
-
               <div className="flex-1 space-y-2 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2">
-                  <FileImage className="w-4 h-4 text-cyan-400" />
+                  <FileImage className="w-4 h-4 text-cyan-400" aria-hidden="true" />
                   <span className="text-sm font-semibold text-white truncate max-w-xs">
                     {selectedFile.name}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400">
-                  Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {selectedFile.type}
+                <p className="text-xs text-slate-500">
+                  {(selectedFile.size / (1024 * 1024)).toFixed(2)}&thinsp;MB &bull; {selectedFile.type}
                 </p>
-                <div className="flex items-center justify-center sm:justify-start gap-1 text-[11px] text-emerald-400">
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  <span>Ready for OCR &amp; AI Security Analysis</span>
+                <div className="flex items-center justify-center sm:justify-start gap-1 text-xs text-emerald-400">
+                  <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                  Ready for OCR and analysis
                 </div>
-
-                <div className="pt-2">
+                <div className="pt-1">
                   <button
                     type="button"
                     onClick={handleRemoveImage}
-                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-medium transition"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-medium transition"
+                    aria-label="Remove uploaded image and start over"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>{t.screenshotAnalyzer.removeImage}</span>
+                    <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    {t.screenshotAnalyzer.removeImage}
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Action Button */}
-            <div className="flex justify-end pt-2 border-t border-white/10">
+            {/* Analyze button */}
+            <div className="flex justify-end pt-1 border-t border-white/[0.06]">
               <button
                 type="button"
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="w-full sm:w-auto px-7 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.01] transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="w-full sm:w-auto px-7 py-3 rounded-xl text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-500 shadow-md shadow-cyan-900/30 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                aria-busy={loading}
               >
                 {loading ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    <span>{t.screenshotAnalyzer.analyzing}</span>
+                    <span
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full motion-safe:animate-spin"
+                      aria-hidden="true"
+                    />
+                    {t.screenshotAnalyzer.analyzing}
                   </>
                 ) : (
                   <>
-                    <Send className="w-4 h-4" />
-                    <span>{t.screenshotAnalyzer.analyze}</span>
+                    <Send className="w-4 h-4" aria-hidden="true" />
+                    {t.screenshotAnalyzer.analyze}
                   </>
                 )}
               </button>
@@ -225,38 +231,57 @@ export default function ScreenshotAnalyzer() {
           </div>
         )}
 
-        {/* Error Alert */}
+        {/* Error */}
         <AnimatePresence>
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              role="alert"
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-4 flex items-center space-x-2 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300"
+              exit={{ opacity: 0, y: -8 }}
+              className="flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300"
             >
-              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-              <span>{error}</span>
+              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div>
+                <p>{error}</p>
+                {error.toLowerCase().includes('unavailable') && (
+                  <p className="mt-1 text-slate-400">
+                    OCR may not be available on the deployment. Try the{' '}
+                    <a href="/scan" className="underline text-cyan-400 hover:text-cyan-300">
+                      Scam Detector
+                    </a>{' '}
+                    to paste the message text directly.
+                  </p>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Loading state */}
       {loading && <LoadingSpinner text={t.screenshotAnalyzer.analyzing} />}
 
-      {/* Extracted Text & Risk Report */}
+      {/* Results */}
       {result && (
         <div className="space-y-6">
-          {/* Extracted OCR Text Display */}
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
-            <div className="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
-              <FileText className="w-4 h-4" />
-              <span>{t.screenshotAnalyzer.extractedText}</span>
+          {/* Extracted text */}
+          <section aria-labelledby="extracted-text-heading">
+            <div className="rounded-xl bg-white/[0.02] border border-white/[0.07] p-5 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                <FileText className="w-4 h-4" aria-hidden="true" />
+                <h2 id="extracted-text-heading">{t.screenshotAnalyzer.extractedText}</h2>
+              </div>
+              {result.extracted_text ? (
+                <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono bg-black/30 p-4 rounded-lg border border-white/[0.05] max-h-48 overflow-y-auto leading-relaxed">
+                  {result.extracted_text}
+                </pre>
+              ) : (
+                <p className="text-xs text-slate-500 italic">
+                  No text could be extracted from this image.
+                </p>
+              )}
             </div>
-            <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono bg-black/40 p-4 rounded-xl border border-white/5 max-h-48 overflow-y-auto leading-relaxed">
-              {result.extracted_text}
-            </pre>
-          </div>
+          </section>
 
           <RiskReport
             result={result}
@@ -269,4 +294,3 @@ export default function ScreenshotAnalyzer() {
     </div>
   );
 }
-
